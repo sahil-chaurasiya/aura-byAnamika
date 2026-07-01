@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, Pagination } from 'swiper/modules';
+import mixitup from 'mixitup';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -20,44 +22,46 @@ export function AdSection({ config = {} }) {
   }, []);
 
   const title = banner?.title || config.title || 'Get 30% Discount On All Hudis!';
-  const subtitle = banner?.subtitle || config.subtitle || 'LIMITED TIME OFFER';
-  const btnText = banner?.buttonText || config.buttonText || 'Shop Now';
+  const subtitle = banner?.subtitle || config.subtitle || 'Trending Products';
+  const btnText = banner?.buttonText || config.buttonText || 'Check Discount';
   const btnLink = banner?.buttonLink || config.buttonLink || '/shop';
-  const image = banner?.image || 'https://images.unsplash.com/photo-1520975954732-35dd22299614?w=1400&h=400&fit=crop';
+  const image = banner?.image || config.image || 'https://images.unsplash.com/photo-1638456266087-09b1d160748b?w=700&h=900&fit=crop&crop=faces&q=80&auto=format';
+  const categories = config.categories || ['Sarees', 'Lehengas', 'Kurtis', 'Anarkali', 'Suits'];
 
   return (
     <div className="ul-container">
-      <section className="ul-ad" style={{ margin: 'clamp(40px,4.2vw,80px) 0' }}>
+      <section className="ul-ad">
+        {/* background texture layer — the reference's .ul-ad::before rule points
+            at a local asset (../img/ad-banner-bg.jpg) that was never bundled
+            into this project, so it silently failed to render. Rendered here
+            instead with a real image so the multiply-blend texture shows up. */}
         <div
-          className="ul-ad-inner"
           style={{
-            backgroundImage: `url(${image})`,
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url(https://images.unsplash.com/photo-1772570824145-e996a55204fb?w=1600&q=70&auto=format&fit=crop)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            borderRadius: 'clamp(15px,2.1vw,40px)',
-            padding: 'clamp(40px,4.2vw,80px) clamp(20px,3.15vw,60px)',
-            position: 'relative',
-            overflow: 'hidden',
+            mixBlendMode: 'multiply',
+            opacity: 0.35,
+            pointerEvents: 'none',
           }}
-        >
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)',
-          }} />
-          <div style={{ position: 'relative', zIndex: 1, maxWidth: 600 }}>
-            <span style={{
-              color: '#FFA31A', fontWeight: 500, fontSize: 'clamp(13px,0.84vw,16px)',
-              letterSpacing: '0.25em', textTransform: 'uppercase', display: 'block', marginBottom: 12,
-            }}>
-              {subtitle}
-            </span>
-            <h2 style={{
-              color: '#fff', fontWeight: 700, fontSize: 'clamp(28px,2.63vw,50px)',
-              lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: 24,
-            }}>
-              {title}
-            </h2>
-            <Link to={btnLink} className="ul-btn" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.5)' }}>
+        />
+        <div className="ul-inner-container" style={{ position: 'relative', zIndex: 1 }}>
+          <div className="ul-ad-content">
+            <div className="ul-ad-txt">
+              <span className="ul-ad-sub-title">{subtitle}</span>
+              <h2 className="ul-section-title">{title}</h2>
+              <div className="ul-ad-categories">
+                {categories.map((c, i) => (
+                  <span className="category" key={i}>
+                    <span><i className="bi bi-check-lg"></i></span>{c}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <Link to={btnLink} className="ul-btn">
               {btnText} <i className="bi bi-arrow-up-right"></i>
             </Link>
           </div>
@@ -70,45 +74,109 @@ export function AdSection({ config = {} }) {
 // ─── MOST SELLING ─────────────────────────────────────────────────
 export function MostSellingSection({ config = {} }) {
   const [products, setProducts] = useState([]);
+  const { currency_symbol = '$' } = useSelector(s => s.settings.data);
+  const gridRef = useRef(null);
+  const mixerRef = useRef(null);
 
   useEffect(() => {
-    api.get('/products?bestSeller=true&limit=8').then(r => setProducts(r.data.data)).catch(() => {});
+    Promise.all([
+      api.get('/products?bestSeller=true&limit=6'),
+      api.get('/products?onSale=true&limit=6'),
+      api.get('/products?sort=rating&limit=6'),
+    ]).then(([bestRes, saleRes, ratingRes]) => {
+      const map = new Map();
+      const add = (list, tag) => {
+        (list || []).forEach(p => {
+          const existing = map.get(p._id) || { ...p, _tags: [] };
+          if (!existing._tags.includes(tag)) existing._tags.push(tag);
+          map.set(p._id, existing);
+        });
+      };
+      add(bestRes.data.data, 'best-selling');
+      add(saleRes.data.data, 'on-selling');
+      add(ratingRes.data.data, 'top-rating');
+      setProducts(Array.from(map.values()).slice(0, 12));
+    }).catch(() => {});
   }, []);
+
+  // Initialize mixitup filtering once the product grid has rendered,
+  // exactly like the reference: mixitup('.ul-filter-products-wrapper')
+  useEffect(() => {
+    if (!products.length || !gridRef.current) return;
+
+    mixerRef.current = mixitup(gridRef.current);
+
+    return () => {
+      if (mixerRef.current) {
+        mixerRef.current.destroy();
+        mixerRef.current = null;
+      }
+    };
+  }, [products]);
 
   return (
     <div className="ul-container">
-      <section style={{ margin: 'clamp(40px,4.2vw,80px) 0' }}>
+      <section className="ul-products ul-most-selling-products">
         <div className="ul-inner-container">
-          <div className="ul-section-heading">
-            <div>
+          <div className="ul-section-heading flex-lg-row flex-column text-md-start text-center">
+            <div className="left">
               <span className="ul-section-sub-title">{config.subtitle || 'most selling items'}</span>
               <h2 className="ul-section-title">{config.title || 'Top selling Categories This Week'}</h2>
             </div>
-            <Link to="/shop?bestSeller=true" className="ul-btn">
-              View All <i className="bi bi-arrow-right"></i>
-            </Link>
+
+            <div className="right">
+              <div className="ul-most-sell-filter-navs">
+                <button type="button" data-filter="all">All Products</button>
+                <button type="button" data-filter=".best-selling">Best Selling</button>
+                <button type="button" data-filter=".on-selling">On Selling</button>
+                <button type="button" data-filter=".top-rating">Top Rating</button>
+              </div>
+            </div>
           </div>
 
-          <Swiper
-            modules={[Navigation, Autoplay]}
-            spaceBetween={30}
-            slidesPerView={4}
-            navigation
-            autoplay={{ delay: 3500, disableOnInteraction: false }}
-            loop={products.length > 4}
-            breakpoints={{
-              0: { slidesPerView: 1 },
-              480: { slidesPerView: 2 },
-              768: { slidesPerView: 3 },
-              1200: { slidesPerView: 4 },
-            }}
+          {/* products grid */}
+          <div
+            ref={gridRef}
+            className="ul-bs-row row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 ul-filter-products-wrapper"
           >
-            {products.map(product => (
-              <SwiperSlide key={product._id}>
-                <ProductCard product={product} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+            {products.map(product => {
+              const displayPrice = product.salePrice || product.price;
+              const rating = Math.round(product.ratings || 0);
+              return (
+                <div key={product._id} className={`mix col ${product._tags.join(' ')}`}>
+                  <div className="ul-product-horizontal">
+                    <div className="ul-product-horizontal-img">
+                      <img
+                        src={product.thumbnail || product.images?.[0]?.url || 'https://via.placeholder.com/126x127?text=No+Image'}
+                        alt={product.name}
+                      />
+                    </div>
+
+                    <div className="ul-product-horizontal-txt">
+                      <span className="ul-product-price">
+                        {currency_symbol}{displayPrice?.toFixed(2)}
+                      </span>
+                      <h4 className="ul-product-title">
+                        <Link to={`/shop/${product.slug}`}>{product.name}</Link>
+                      </h4>
+                      <h5 className="ul-product-category">
+                        <Link to={`/shop?category=${product.category?.slug || ''}`}>
+                          {product.category?.name || 'Fashion'}
+                        </Link>
+                      </h5>
+                      <div className="ul-product-rating">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <span key={i} className="star">
+                            <i className={i < rating ? 'bi bi-star-fill' : 'bi bi-star'}></i>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
     </div>

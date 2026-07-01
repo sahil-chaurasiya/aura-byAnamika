@@ -56,7 +56,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <>
-        <Helmet><title>Cart - Glamics</title></Helmet>
+        <Helmet><title>Cart - Aura by Anamika</title></Helmet>
         <div className="ul-inner-page-container" style={{ textAlign: 'center', padding: '80px 0' }}>
           <i className="bi bi-bag-x" style={{ fontSize: 72, color: '#EF2853', display: 'block', marginBottom: 20 }}></i>
           <h2 style={{ fontWeight: 600, marginBottom: 12 }}>Your Cart is Empty</h2>
@@ -71,7 +71,7 @@ export default function CartPage() {
 
   return (
     <>
-      <Helmet><title>Cart ({items.length}) - Glamics</title></Helmet>
+      <Helmet><title>Cart ({items.length}) - Aura by Anamika</title></Helmet>
 
       <div className="ul-container">
         <Breadcrumb title="Cart" links={[{ label: 'Cart' }]} />

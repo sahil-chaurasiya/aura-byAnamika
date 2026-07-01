@@ -15,7 +15,7 @@ const rootReducer = combineReducers({
 });
 
 const persistConfig = {
-  key: 'glamics',
+  key: 'aura-by-anamika',
   storage,
   whitelist: ['auth', 'cart', 'wishlist'],
 };

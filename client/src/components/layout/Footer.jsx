@@ -161,7 +161,7 @@ export default function Footer() {
           <div className="ul-footer-middle-widget align-self-center">
             <Link to="/">
               <span style={{ fontWeight: 800, fontSize: '28px', color: '#fff', letterSpacing: '-1px' }}>
-                {settings.store_name || 'GLAMICS'}
+                <img src="/assets/img/logo.png" alt="Aura by Anamika" style={{ height: 56, objectFit: 'contain' }} />
               </span>
             </Link>
           </div>
@@ -170,7 +170,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="ul-footer-bottom">
           <p className="copyright-txt">
-            {settings.footer_copyright || 'Copyright 2024 © Glamics'}
+            {settings.footer_copyright || 'Copyright 2024 © Aura by Anamika'}
           </p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
             {['VISA', 'MC', 'PAYPAL', 'AMEX', 'APPLE PAY'].map(method => (

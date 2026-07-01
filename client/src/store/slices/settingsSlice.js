@@ -10,7 +10,7 @@ const settingsSlice = createSlice({
   name: 'settings',
   initialState: {
     data: {
-      store_name: 'Glamics',
+      store_name: 'Aura by Anamika',
       logo: '/assets/img/logo.png',
       primary_color: '#EF2853',
       currency_symbol: '$',

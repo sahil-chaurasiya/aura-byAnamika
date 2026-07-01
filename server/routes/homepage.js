@@ -15,7 +15,7 @@ const DEFAULT_SECTIONS = [
   { key: 'reviews', label: 'Customer Reviews', isEnabled: true, order: 8, config: { title: 'Product Reviews', subtitle: 'Customer Reviews' } },
   { key: 'newsletter', label: 'Newsletter Subscription', isEnabled: true, order: 9, config: {} },
   { key: 'blog', label: 'Blog Section', isEnabled: true, order: 10, config: { title: 'Explore Our Blogs', subtitle: 'News & Blog' } },
-  { key: 'gallery', label: 'Instagram Gallery', isEnabled: true, order: 11, config: { title: 'Follow Us @glamics' } },
+  { key: 'gallery', label: 'Instagram Gallery', isEnabled: true, order: 11, config: { title: 'Follow Us @aura_by_anamika' } },
 ];
 
 router.get('/', async (req, res) => {

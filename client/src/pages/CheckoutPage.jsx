@@ -271,7 +271,7 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <Helmet><title>Checkout - Glamics</title></Helmet>
+      <Helmet><title>Checkout - Aura by Anamika</title></Helmet>
 
       <div className="ul-container">
         <Breadcrumb title="Checkout" links={[{ label: 'Cart', to: '/cart' }, { label: 'Checkout' }]} />

@@ -25,7 +25,7 @@ export function BlogPage() {
 
   return (
     <>
-      <Helmet><title>Blog - Glamics Fashion</title></Helmet>
+      <Helmet><title>Blog - Aura by Anamika</title></Helmet>
       <div className="ul-container"><Breadcrumb title="Blog" links={[{ label: 'Blog' }]} /></div>
       <div className="ul-inner-page-container">
         {loading ? (
@@ -103,7 +103,7 @@ export function BlogDetailPage() {
   return (
     <>
       <Helmet>
-        <title>{post.title} - Glamics Blog</title>
+        <title>{post.title} - Aura by Anamika Blog</title>
         <meta name="description" content={post.excerpt || post.title} />
       </Helmet>
       <div className="ul-container"><Breadcrumb title="Blog Details" links={[{ label: 'Blog', to: '/blog' }, { label: post.title }]} /></div>
@@ -140,18 +140,18 @@ export function AboutPage() {
   const settings = useSelector(selectSettings);
   return (
     <>
-      <Helmet><title>About Us - Glamics</title></Helmet>
+      <Helmet><title>About Us - Aura by Anamika</title></Helmet>
       <div className="ul-container"><Breadcrumb title="About Us" links={[{ label: 'About' }]} /></div>
       <div className="ul-inner-page-container">
         <div className="row ul-bs-row align-items-center" style={{ marginBottom: 60 }}>
           <div className="col-lg-6">
-            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=700&h=500&fit=crop" alt="About Glamics" style={{ borderRadius: 24, width: '100%' }} />
+            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=700&h=500&fit=crop" alt="About Aura by Anamika" style={{ borderRadius: 24, width: '100%' }} />
           </div>
           <div className="col-lg-6">
             <span className="ul-section-sub-title">Our Story</span>
             <h2 className="ul-section-title" style={{ marginBottom: 20 }}>Premium Fashion for the Modern World</h2>
             <p style={{ color: '#555', lineHeight: 1.9, fontSize: 15, marginBottom: 16 }}>
-              Founded with a passion for style and quality, {settings.store_name || 'Glamics'} has been bringing premium fashion to discerning customers worldwide. We believe fashion should be accessible, sustainable, and above all — beautiful.
+              Founded with a passion for style and quality, {settings.store_name || 'Aura by Anamika'} has been bringing premium fashion to discerning customers worldwide. We believe fashion should be accessible, sustainable, and above all — beautiful.
             </p>
             <p style={{ color: '#555', lineHeight: 1.9, fontSize: 15, marginBottom: 24 }}>
               Our curated collections span everything from everyday essentials to statement pieces for special occasions. Every product is carefully selected for quality, style, and value.
@@ -210,7 +210,7 @@ export function ContactPage() {
 
   return (
     <>
-      <Helmet><title>Contact Us - Glamics</title></Helmet>
+      <Helmet><title>Contact Us - Aura by Anamika</title></Helmet>
       <div className="ul-container"><Breadcrumb title="Contact" links={[{ label: 'Contact' }]} /></div>
       <div className="ul-inner-page-container">
         <div className="row ul-bs-row">
@@ -274,7 +274,7 @@ export function FaqPage() {
 
   return (
     <>
-      <Helmet><title>FAQ - Glamics</title></Helmet>
+      <Helmet><title>FAQ - Aura by Anamika</title></Helmet>
       <div className="ul-container"><Breadcrumb title="FAQ" links={[{ label: 'FAQ' }]} /></div>
       <div className="ul-inner-page-container">
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
@@ -348,7 +348,7 @@ export function AccountPage() {
 
   return (
     <>
-      <Helmet><title>My Account - Glamics</title></Helmet>
+      <Helmet><title>My Account - Aura by Anamika</title></Helmet>
       <div className="ul-inner-page-container">
         <div className="row ul-bs-row">
           {/* Sidebar */}

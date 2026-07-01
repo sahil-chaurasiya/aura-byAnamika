@@ -33,7 +33,7 @@ const Sidebar = forwardRef(function Sidebar({ onClose }, ref) {
         <div className="ul-sidebar-header-logo">
           <Link to="/" onClick={onClose}>
             <span style={{ fontWeight: 800, fontSize: '22px', color: '#EF2853', letterSpacing: '-1px' }}>
-              {settings.store_name || 'GLAMICS'}
+              <img src="/assets/img/logo.png" alt="Aura by Anamika" style={{ height: 40, objectFit: 'contain' }} />
             </span>
           </Link>
         </div>
@@ -75,7 +75,7 @@ const Sidebar = forwardRef(function Sidebar({ onClose }, ref) {
 
       {/* About — desktop only */}
       <div className="ul-sidebar-about d-none d-lg-block">
-        <span className="title">About {settings.store_name || 'Glamics'}</span>
+        <span className="title">About Aura by Anamika</span>
         <p className="mb-0">
           {settings.sidebar_about_text ||
             'We are a premium fashion destination offering curated collections for modern style enthusiasts.'}

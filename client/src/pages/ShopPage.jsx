@@ -204,7 +204,7 @@ export default function ShopPage() {
   return (
     <>
       <Helmet>
-        <title>Shop - Glamics Fashion</title>
+        <title>Shop - Aura by Anamika</title>
         <meta name="description" content="Browse our complete collection of premium fashion." />
       </Helmet>
 

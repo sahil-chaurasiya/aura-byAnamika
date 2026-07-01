@@ -35,8 +35,8 @@ export default function LoginPage() {
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-1px' }}>
-            <span style={{ color: '#EF2853' }}>Glamics</span> Admin
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <img src="/assets/img/logo.png" alt="Aura by Anamika" style={{ height: 60, objectFit: "contain" }} />
           </div>
           <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: 8, fontSize: 14 }}>
             Sign in to manage your store
@@ -54,7 +54,7 @@ export default function LoginPage() {
                   className="form-control"
                   style={{ paddingLeft: 40 }}
                   type="email"
-                  placeholder="admin@glamics.com"
+                  placeholder="admin@aura.com"
                   required
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
@@ -104,7 +104,7 @@ export default function LoginPage() {
 
           <div style={{ marginTop: 24, padding: 16, background: '#f9f9f9', borderRadius: 10, fontSize: 13, color: '#666', textAlign: 'center' }}>
             <strong>Demo credentials:</strong><br />
-            Email: admin@glamics.com<br />
+            Email: admin@aura.com<br />
             Password: admin123456
           </div>
         </div>

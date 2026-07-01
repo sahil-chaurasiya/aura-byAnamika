@@ -2,8 +2,8 @@ const { Settings } = require('../models/index');
 
 // Default settings
 const DEFAULT_SETTINGS = {
-  store_name: { value: 'Glamics', group: 'general', label: 'Store Name', type: 'text' },
-  store_email: { value: 'hello@glamics.com', group: 'general', label: 'Store Email', type: 'text' },
+  store_name: { value: 'Aura by Anamika', group: 'general', label: 'Store Name', type: 'text' },
+  store_email: { value: 'hello@aura.com', group: 'general', label: 'Store Email', type: 'text' },
   store_phone: { value: '(500) 8001 8588', group: 'general', label: 'Store Phone', type: 'text' },
   store_address: { value: '123 Fashion Street, New York, NY 10001', group: 'general', label: 'Store Address', type: 'text' },
   logo: { value: '/assets/img/logo.png', group: 'branding', label: 'Logo', type: 'image' },
@@ -30,9 +30,9 @@ const DEFAULT_SETTINGS = {
   sidebar_about_text: { value: 'We are a premium fashion destination offering curated collections for modern style enthusiasts. Discover the latest trends with exceptional quality.', group: 'general', label: 'Sidebar About Text', type: 'text' },
   newsletter_title: { value: 'Sign Up to Newsletter', group: 'marketing', label: 'Newsletter Title', type: 'text' },
   newsletter_subtitle: { value: 'GET NEWSLETTER', group: 'marketing', label: 'Newsletter Subtitle', type: 'text' },
-  footer_copyright: { value: 'Copyright 2024 © Glamics', group: 'footer', label: 'Footer Copyright', type: 'text' },
-  meta_title: { value: 'Glamics - Premium Fashion & Apparel', group: 'seo', label: 'Default Meta Title', type: 'text' },
-  meta_description: { value: 'Shop the latest fashion trends at Glamics. Premium quality clothing, accessories and more.', group: 'seo', label: 'Default Meta Description', type: 'text' },
+  footer_copyright: { value: 'Copyright 2024 © Aura by Anamika', group: 'footer', label: 'Footer Copyright', type: 'text' },
+  meta_title: { value: 'Aura by Anamika - Premium Fashion & Apparel', group: 'seo', label: 'Default Meta Title', type: 'text' },
+  meta_description: { value: 'Shop the latest fashion trends at Aura by Anamika. Premium quality clothing, accessories and more.', group: 'seo', label: 'Default Meta Description', type: 'text' },
 };
 
 // @desc   Get all settings

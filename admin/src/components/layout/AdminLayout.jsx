@@ -54,7 +54,7 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className={`admin-sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
-          <span><em>Glamics</em> Admin</span>
+          <img src="/assets/img/logo.png" alt="Aura by Anamika" style={{ height: 48, objectFit: "contain", mixBlendMode: "screen" }} />
         </div>
 
         <nav className="sidebar-nav">

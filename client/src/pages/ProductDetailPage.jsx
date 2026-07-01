@@ -127,7 +127,7 @@ export default function ProductDetailPage() {
   return (
     <>
       <Helmet>
-        <title>{product.name} - Glamics</title>
+        <title>{product.name} - Aura by Anamika</title>
         <meta name="description" content={product.shortDescription || product.description?.slice(0, 160)} />
         <meta property="og:title" content={product.name} />
         <meta property="og:image" content={product.thumbnail} />

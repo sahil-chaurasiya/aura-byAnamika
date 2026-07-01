@@ -41,7 +41,7 @@ export function LoginPage() {
 
   return (
     <>
-      <Helmet><title>Login - Glamics</title></Helmet>
+      <Helmet><title>Login - Aura by Anamika</title></Helmet>
       <div className="ul-container"><Breadcrumb title="Login" links={[{ label: 'Login' }]} /></div>
       <div className="ul-inner-page-container">
         <div style={{ maxWidth: 480, margin: '0 auto' }}>
@@ -108,7 +108,7 @@ export function SignupPage() {
 
   return (
     <>
-      <Helmet><title>Sign Up - Glamics</title></Helmet>
+      <Helmet><title>Sign Up - Aura by Anamika</title></Helmet>
       <div className="ul-container"><Breadcrumb title="Sign Up" links={[{ label: 'Sign Up' }]} /></div>
       <div className="ul-inner-page-container">
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
@@ -169,7 +169,7 @@ export function OrderSuccessPage() {
 
   return (
     <>
-      <Helmet><title>Order Confirmed - Glamics</title></Helmet>
+      <Helmet><title>Order Confirmed - Aura by Anamika</title></Helmet>
       <div className="ul-inner-page-container" style={{ textAlign: 'center', padding: '60px 20px' }}>
         <div style={{ width: 100, height: 100, borderRadius: '50%', background: 'linear-gradient(135deg,#EF2853,#FFA31A)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
           <i className="bi bi-bag-check-fill" style={{ fontSize: 44, color: '#fff' }}></i>
@@ -219,7 +219,7 @@ export function WishlistPage() {
 
   return (
     <>
-      <Helmet><title>Wishlist - Glamics</title></Helmet>
+      <Helmet><title>Wishlist - Aura by Anamika</title></Helmet>
       <div className="ul-container"><Breadcrumb title="Wishlist" links={[{ label: 'Wishlist' }]} /></div>
       <div className="ul-inner-page-container">
         {!isAuthenticated ? (
@@ -262,7 +262,7 @@ export function WishlistPage() {
 export function NotFoundPage() {
   return (
     <>
-      <Helmet><title>404 - Page Not Found - Glamics</title></Helmet>
+      <Helmet><title>404 - Page Not Found - Aura by Anamika</title></Helmet>
       <div style={{ textAlign: 'center', padding: '80px 20px' }}>
         <h1 style={{ fontSize: 'clamp(80px,10vw,160px)', fontWeight: 800, color: '#EF2853', lineHeight: 1, marginBottom: 0 }}>404</h1>
         <h2 style={{ fontWeight: 600, fontSize: 'clamp(22px,2vw,36px)', marginBottom: 16 }}>Page Not Found</h2>
@@ -274,4 +274,3 @@ export function NotFoundPage() {
     </>
   );
 }
-

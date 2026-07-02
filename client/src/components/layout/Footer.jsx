@@ -97,41 +97,6 @@ export default function Footer() {
 
         {/* Middle */}
         <div className="ul-footer-middle">
-          {/* App Links */}
-          <div className="ul-footer-middle-widget">
-            <h3 className="ul-footer-middle-widget-title">Download Our Apps</h3>
-            <div className="ul-footer-middle-widget-content">
-              <div className="app-links">
-                <a href={settings.app_android_url || '#'} target="_blank" rel="noreferrer">
-                  <div style={{
-                    background: '#000', color: '#fff', borderRadius: 8,
-                    padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 10,
-                    textDecoration: 'none', width: 140
-                  }}>
-                    <i className="bi bi-google-play" style={{ fontSize: 24 }}></i>
-                    <div>
-                      <div style={{ fontSize: 10 }}>GET IT ON</div>
-                      <div style={{ fontSize: 14, fontWeight: 600 }}>Google Play</div>
-                    </div>
-                  </div>
-                </a>
-                <a href={settings.app_ios_url || '#'} target="_blank" rel="noreferrer">
-                  <div style={{
-                    background: '#000', color: '#fff', borderRadius: 8,
-                    padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 10,
-                    textDecoration: 'none', width: 140, marginTop: 8
-                  }}>
-                    <i className="bi bi-apple" style={{ fontSize: 24 }}></i>
-                    <div>
-                      <div style={{ fontSize: 10 }}>DOWNLOAD ON THE</div>
-                      <div style={{ fontSize: 14, fontWeight: 600 }}>App Store</div>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
-
           {/* Social Links */}
           <div className="ul-footer-middle-widget">
             <h3 className="ul-footer-middle-widget-title">Follow us</h3>

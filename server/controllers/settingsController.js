@@ -23,8 +23,6 @@ const DEFAULT_SETTINGS = {
   free_shipping_threshold: { value: 100, group: 'commerce', label: 'Free Shipping Above ($)', type: 'number' },
   shipping_cost: { value: 9.99, group: 'commerce', label: 'Standard Shipping Cost ($)', type: 'number' },
   announcement_text: { value: '🌟 Limited time offer - Free shipping on orders over $100!', group: 'marketing', label: 'Announcement Bar Text', type: 'text' },
-  app_android_url: { value: '#', group: 'apps', label: 'Android App URL', type: 'text' },
-  app_ios_url: { value: '#', group: 'apps', label: 'iOS App URL', type: 'text' },
   phone_1: { value: '(500) 8001 8588', group: 'contact', label: 'Phone 1', type: 'text' },
   phone_2: { value: '(500) 544 6550', group: 'contact', label: 'Phone 2', type: 'text' },
   sidebar_about_text: { value: 'We are a premium fashion destination offering curated collections for modern style enthusiasts. Discover the latest trends with exceptional quality.', group: 'general', label: 'Sidebar About Text', type: 'text' },
@@ -56,7 +54,7 @@ const getPublicSettings = async (req, res) => {
   const publicKeys = ['store_name', 'logo', 'logo_white', 'favicon', 'primary_color', 'secondary_color',
     'store_email', 'store_phone', 'store_address', 'facebook_url', 'twitter_url', 'instagram_url',
     'youtube_url', 'linkedin_url', 'gmb_url', 'currency', 'currency_symbol', 'announcement_text',
-    'app_android_url', 'app_ios_url', 'phone_1', 'phone_2', 'sidebar_about_text',
+    'phone_1', 'phone_2', 'sidebar_about_text',
     'newsletter_title', 'newsletter_subtitle', 'footer_copyright', 'meta_title', 'meta_description'];
   let settings = await Settings.find({ key: { $in: publicKeys } }).lean();
   const map = {};

@@ -24,7 +24,7 @@ img { max-width: 100%; }
 
 /* Layout */
 .admin-layout { display: flex; min-height: 100vh; }
-.admin-sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--text); position: fixed; top: 0; left: 0; z-index: 100; display: flex; flex-direction: column; transition: transform 0.3s; }
+.admin-sidebar { width: var(--sidebar-w); height: 100vh; background: var(--text); position: fixed; top: 0; left: 0; z-index: 100; display: flex; flex-direction: column; transition: transform 0.3s; overflow: hidden; }
 .admin-main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 .admin-header { height: var(--header-h); background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 99; }
 .admin-content { padding: 24px; flex: 1; }
@@ -33,7 +33,11 @@ img { max-width: 100%; }
 .sidebar-logo { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
 .sidebar-logo span { color: #fff; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
 .sidebar-logo span em { color: var(--primary); font-style: normal; }
-.sidebar-nav { padding: 12px; flex: 1; overflow-y: auto; }
+.sidebar-nav { padding: 12px; flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
+.sidebar-nav::-webkit-scrollbar { width: 6px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 999px; }
+.sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); }
 .sidebar-section { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.3); padding: 16px 12px 8px; font-weight: 600; }
 .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.65); transition: 0.2s; font-size: 13.5px; font-weight: 500; }
 .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #fff; }

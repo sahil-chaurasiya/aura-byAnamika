@@ -39,7 +39,7 @@ const DEFAULT_SECTIONS = [
   { key: 'reviews', label: 'Customer Reviews', isEnabled: true, order: 8, config: { title: 'Product Reviews', subtitle: 'Customer Reviews' } },
   { key: 'newsletter', label: 'Newsletter Subscription', isEnabled: true, order: 9, config: {} },
   { key: 'blog', label: 'Blog Section', isEnabled: true, order: 10, config: { title: 'Explore Our Blogs', subtitle: 'News & Blog' } },
-  { key: 'gallery', label: 'Instagram Gallery', isEnabled: true, order: 11, config: { title: 'Follow Us @aura_by_anamika' } },
+  { key: 'gallery', label: 'Our Videos', isEnabled: true, order: 11, config: { title: 'Our Videos', subtitle: 'Watch our latest collections', videos: [] } },
 ];
 
 router.get('/', async (req, res) => {

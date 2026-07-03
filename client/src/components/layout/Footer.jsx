@@ -69,7 +69,6 @@ export default function Footer() {
 
   const socialLinks = [
     { icon: 'bi-facebook', url: settings.facebook_url || '#' },
-    { icon: 'bi-twitter-x', url: settings.twitter_url || '#' },
     { icon: 'bi-instagram', url: settings.instagram_url || '#' },
     { icon: 'bi-youtube', url: settings.youtube_url || '#' },
     { icon: 'bi-google', url: settings.gmb_url || '#' },

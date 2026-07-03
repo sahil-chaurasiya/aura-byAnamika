@@ -2178,6 +2178,67 @@ button {
   color: var(--black);
 }
 
+/* ── OUR VIDEOS — reel-style infinite marquee (9:16 clips) ── */
+.ul-video-gallery {
+  padding-top: clamp(10px, 1.5vw, 24px);
+  padding-bottom: clamp(40px, 4.2vw, 80px);
+  max-width: 1920px;
+  margin: auto;
+  overflow: hidden;
+}
+
+.ul-video-gallery-track {
+  display: flex;
+  gap: clamp(10px, 1.05vw, 20px);
+  width: max-content;
+  padding: 0 clamp(14px, 1.5vw, 30px);
+  animation: ul-gallery-scroll 30s linear infinite;
+}
+
+.ul-video-gallery:hover .ul-video-gallery-track {
+  animation-play-state: paused;
+}
+
+.ul-video-item {
+  flex: 0 0 auto;
+}
+
+.ul-video-item-inner {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ul-video-item video {
+  width: clamp(140px, 13vw, 220px);
+  height: clamp(249px, 23.1vw, 391px); /* true 9:16 reel ratio */
+  object-fit: cover;
+  display: block;
+  border-radius: clamp(10px, 1.05vw, 20px);
+  background: #111;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.ul-video-caption {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--ul-text-2, #666);
+  margin-top: 8px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@media screen and (max-width: 575px) {
+  .ul-video-gallery-track {
+    gap: 8px;
+  }
+  .ul-video-item video {
+    width: 114px;
+    height: 203px;
+    border-radius: 8px;
+  }
+}
+
 /* ── CUSTOMER DIARIES (About page) — same infinite marquee technique,
    plain rectangular photos, no overlay/buttons ── */
 .ul-customer-diaries {

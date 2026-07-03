@@ -18,6 +18,22 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
 
+// Video uploads (e.g. the homepage "Our Videos" reel marquee) need their
+// own filter + a much higher size ceiling than photos.
+const videoFileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('video/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only video files are allowed'), false);
+  }
+};
+
+const uploadVideo = multer({
+  storage,
+  fileFilter: videoFileFilter,
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
+});
+
 const uploadToCloudinary = async (buffer, folder = 'glamics', options = {}) => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
@@ -30,12 +46,24 @@ const uploadToCloudinary = async (buffer, folder = 'glamics', options = {}) => {
   });
 };
 
-const deleteFromCloudinary = async (publicId) => {
+const uploadVideoToCloudinary = async (buffer, folder = 'glamics', options = {}) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      { folder: `glamics/${folder}`, resource_type: 'video', ...options },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    ).end(buffer);
+  });
+};
+
+const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
   try {
-    await cloudinary.uploader.destroy(publicId);
+    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
   } catch (error) {
     console.error('Cloudinary delete error:', error);
   }
 };
 
-module.exports = { upload, uploadToCloudinary, deleteFromCloudinary };
+module.exports = { upload, uploadVideo, uploadToCloudinary, uploadVideoToCloudinary, deleteFromCloudinary };

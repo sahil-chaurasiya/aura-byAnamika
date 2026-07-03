@@ -375,46 +375,56 @@ export function HomepageBuilderPage() {
 
   const updateConfig = (key, config) => setSections(ss => ss.map(s => s.key === key ? { ...s, config: { ...s.config, ...config } } : s));
 
-  // Gallery images can be plain URL strings (old/seeded data) or
-  // { image, link } objects (new format). Normalize to objects everywhere
-  // we read them so both shapes work.
-  const normalizeGalleryImages = (config) =>
-    (config?.images || []).map(item => typeof item === 'string' ? { image: item, link: '' } : { image: item.image || '', link: item.link || '' });
+  // Gallery videos are stored as { video, link, caption } objects. Older
+  // installs may still have the legacy image-gallery shape ({ image, link })
+  // or a bare URL string — normalize everything so the editor never breaks
+  // on old data, it just won't have a video yet.
+  const normalizeGalleryVideos = (config) =>
+    (config?.videos || []).map(item => typeof item === 'string'
+      ? { video: item, link: '', caption: '' }
+      : { video: item.video || '', link: item.link || '', caption: item.caption || '' });
 
-  const setGalleryImages = (key, images) => updateConfig(key, { images });
+  const setGalleryVideos = (key, videos) => updateConfig(key, { videos });
 
-  const handleGalleryImageUpload = async (key, idx, file) => {
+  const handleGalleryVideoUpload = async (key, idx, file) => {
     if (!file) return;
     setUploadingGallery(`${key}-${idx}`);
     try {
       const fd = new FormData();
-      fd.append('image', file);
-      fd.append('folder', 'gallery');
-      const { data } = await api.post('/upload/image', fd);
+      fd.append('video', file);
+      fd.append('folder', 'videos');
+      const { data } = await api.post('/upload/video', fd);
       const section = sections.find(s => s.key === key);
-      const images = normalizeGalleryImages(section.config);
-      if (idx === images.length) images.push({ image: data.data.url, link: '' });
-      else images[idx] = { ...images[idx], image: data.data.url };
-      setGalleryImages(key, images);
-      toast.success('Image uploaded');
+      const videos = normalizeGalleryVideos(section.config);
+      if (idx === videos.length) videos.push({ video: data.data.url, link: '', caption: '' });
+      else videos[idx] = { ...videos[idx], video: data.data.url };
+      setGalleryVideos(key, videos);
+      toast.success('Video uploaded');
     } catch {
-      toast.error('Image upload failed');
+      toast.error('Video upload failed');
     } finally {
       setUploadingGallery(null);
     }
   };
 
-  const updateGalleryLink = (key, idx, link) => {
+  const updateGalleryVideoLink = (key, idx, link) => {
     const section = sections.find(s => s.key === key);
-    const images = normalizeGalleryImages(section.config);
-    images[idx] = { ...images[idx], link };
-    setGalleryImages(key, images);
+    const videos = normalizeGalleryVideos(section.config);
+    videos[idx] = { ...videos[idx], link };
+    setGalleryVideos(key, videos);
   };
 
-  const removeGalleryImage = (key, idx) => {
+  const updateGalleryVideoCaption = (key, idx, caption) => {
     const section = sections.find(s => s.key === key);
-    const images = normalizeGalleryImages(section.config).filter((_, i) => i !== idx);
-    setGalleryImages(key, images);
+    const videos = normalizeGalleryVideos(section.config);
+    videos[idx] = { ...videos[idx], caption };
+    setGalleryVideos(key, videos);
+  };
+
+  const removeGalleryVideo = (key, idx) => {
+    const section = sections.find(s => s.key === key);
+    const videos = normalizeGalleryVideos(section.config).filter((_, i) => i !== idx);
+    setGalleryVideos(key, videos);
   };
 
   // ── Featured Products rows (category + banner per row) ──
@@ -501,7 +511,7 @@ export function HomepageBuilderPage() {
     return new Date(utcMs).toISOString();
   };
 
-  const SECTION_ICONS = { hero: 'bi-images', categories: 'bi-grid', products: 'bi-bag', ad: 'bi-megaphone', mostSelling: 'bi-fire', video: 'bi-play-circle', subBanners: 'bi-layout-text-window', flashSale: 'bi-lightning', reviews: 'bi-star', newsletter: 'bi-envelope', blog: 'bi-journal-text', gallery: 'bi-camera' };
+  const SECTION_ICONS = { hero: 'bi-images', categories: 'bi-grid', products: 'bi-bag', ad: 'bi-megaphone', mostSelling: 'bi-fire', video: 'bi-play-circle', subBanners: 'bi-layout-text-window', flashSale: 'bi-lightning', reviews: 'bi-star', newsletter: 'bi-envelope', blog: 'bi-journal-text', gallery: 'bi-camera-video' };
 
   return (
     <div>
@@ -564,7 +574,7 @@ export function HomepageBuilderPage() {
                 <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', background: '#fafafa' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))', gap: 16 }}>
                     {Object.entries(section.config || {}).map(([k, v]) => (
-                      k === 'images' || k === 'endDate' ? null :
+                      k === 'images' || k === 'videos' || k === 'endDate' ? null :
                       typeof v === 'string' ? (
                         <div key={k} className="form-group" style={{ margin: 0 }}>
                           <label className="form-label" style={{ textTransform: 'capitalize' }}>{k.replace(/([A-Z])/g, ' $1')}</label>
@@ -640,15 +650,15 @@ export function HomepageBuilderPage() {
 
                   {section.key === 'gallery' && (
                     <div style={{ marginTop: 20 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Gallery Images</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Videos</div>
                       <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
-                        Upload the photos shown in this section and set where each one should take people — a category, a product, or an external Instagram post. Leave the link blank to just open the image itself.
+                        Upload short clips (reels work great) for the "Our Videos" marquee on the homepage. Add an optional link to send people somewhere when they tap a clip, and an optional caption.
                       </p>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px,1fr))', gap: 14 }}>
-                        {normalizeGalleryImages(section.config).map((item, idx) => (
+                        {normalizeGalleryVideos(section.config).map((item, idx) => (
                           <div key={idx} className="card" style={{ padding: 10 }}>
-                            <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', borderRadius: 8, overflow: 'hidden', background: '#eee', marginBottom: 8 }}>
-                              {item.image && <img src={item.image} alt={`Gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                            <div style={{ position: 'relative', width: '100%', aspectRatio: '9/16', borderRadius: 8, overflow: 'hidden', background: '#111', marginBottom: 8 }}>
+                              {item.video && <video src={item.video} muted playsInline loop controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                               {uploadingGallery === `${section.key}-${idx}` && (
                                 <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <i className="bi bi-hourglass-split"></i>
@@ -656,31 +666,34 @@ export function HomepageBuilderPage() {
                               )}
                             </div>
                             <label className="btn btn-outline btn-sm" style={{ width: '100%', textAlign: 'center', marginBottom: 8, cursor: 'pointer', display: 'block' }}>
-                              <i className="bi bi-upload"></i> {item.image ? 'Replace Image' : 'Upload Image'}
-                              <input type="file" accept="image/*" style={{ display: 'none' }}
-                                onChange={e => handleGalleryImageUpload(section.key, idx, e.target.files[0])} />
+                              <i className="bi bi-upload"></i> {item.video ? 'Replace Video' : 'Upload Video'}
+                              <input type="file" accept="video/*" style={{ display: 'none' }}
+                                onChange={e => handleGalleryVideoUpload(section.key, idx, e.target.files[0])} />
                             </label>
                             <input className="form-control" style={{ fontSize: 12, marginBottom: 8 }}
                               placeholder="Link URL (optional)"
-                              value={item.link} onChange={e => updateGalleryLink(section.key, idx, e.target.value)} />
+                              value={item.link} onChange={e => updateGalleryVideoLink(section.key, idx, e.target.value)} />
+                            <input className="form-control" style={{ fontSize: 12, marginBottom: 8 }}
+                              placeholder="Caption (optional)"
+                              value={item.caption} onChange={e => updateGalleryVideoCaption(section.key, idx, e.target.value)} />
                             <button type="button" className="btn btn-outline btn-sm" style={{ width: '100%', color: '#d33' }}
-                              onClick={() => removeGalleryImage(section.key, idx)}>
+                              onClick={() => removeGalleryVideo(section.key, idx)}>
                               <i className="bi bi-trash"></i> Remove
                             </button>
                           </div>
                         ))}
 
                         <label className="card" style={{ padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 190, cursor: 'pointer', border: '2px dashed var(--border)' }}>
-                          {uploadingGallery === `${section.key}-${normalizeGalleryImages(section.config).length}` ? (
+                          {uploadingGallery === `${section.key}-${normalizeGalleryVideos(section.config).length}` ? (
                             <i className="bi bi-hourglass-split" style={{ fontSize: 22 }}></i>
                           ) : (
                             <>
                               <i className="bi bi-plus-circle" style={{ fontSize: 22, color: 'var(--muted)' }}></i>
-                              <span style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>Add Image</span>
+                              <span style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>Add Video</span>
                             </>
                           )}
-                          <input type="file" accept="image/*" style={{ display: 'none' }}
-                            onChange={e => handleGalleryImageUpload(section.key, normalizeGalleryImages(section.config).length, e.target.files[0])} />
+                          <input type="file" accept="video/*" style={{ display: 'none' }}
+                            onChange={e => handleGalleryVideoUpload(section.key, normalizeGalleryVideos(section.config).length, e.target.files[0])} />
                         </label>
                       </div>
                     </div>

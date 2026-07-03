@@ -460,62 +460,82 @@ export function BlogSection({ config = {} }) {
   );
 }
 
-// ─── INSTAGRAM GALLERY ────────────────────────────────────────────
+// ─── OUR VIDEOS — reel-style marquee ───────────────────────────────
 export function GallerySection({ config = {} }) {
-  const defaultImages = [
-    { image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=400&fit=crop', link: '' },
-    { image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop', link: '' },
-    { image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop', link: '' },
-    { image: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&fit=crop', link: '' },
-    { image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=400&fit=crop', link: '' },
-    { image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=400&fit=crop', link: '' },
-    { image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop', link: '' },
-    { image: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&fit=crop', link: '' },
-  ];
-  // Backward-compatible: older/seeded configs store images as plain URL
-  // strings. Normalize everything to { image, link } so both shapes work.
-  const rawImages = (config.images && config.images.length) ? config.images : defaultImages;
-  const images = rawImages.map(item =>
-    typeof item === 'string' ? { image: item, link: '' } : { image: item.image, link: item.link || '' }
-  );
+  const videos = config.videos || [];
+  const trackRef = useRef(null);
 
-  // Duplicate: render set A + set B side by side.
-  // Animate: slide the track left by exactly 50% (= one full set width).
-  // Shape: use position within ONE set (pos % images.length % 2) so both
-  //        set A and set B have identical square-circle-square-circle pattern —
-  //        the loop snap is invisible because the pattern matches perfectly.
-  const doubled = [...images, ...images];
+  // Play a reel when it scrolls into view, pause it when it scrolls out —
+  // same approach as the Ritu Ghai reference site, so we're not running
+  // a dozen muted videos at once on slower devices.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const items = track.querySelectorAll('.ul-video-item');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const video = entry.target.querySelector('video');
+        if (!video) return;
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      });
+    }, { threshold: 0.2 });
+    items.forEach(item => observer.observe(item));
+    return () => observer.disconnect();
+  }, [videos.length]);
+
+  if (!videos.length) return null;
+
+  // The CSS marquee loops by sliding the track left by exactly 50% of its
+  // own width, then snapping back — that only looks seamless if a single
+  // "set" of videos is already wider than the screen. With only a few
+  // clips (or just one), a lone set is much narrower than the viewport,
+  // so the strip visibly runs out and leaves blank space before it can
+  // loop. Fix: repeat the uploaded videos enough times to build one set
+  // that's comfortably wider than any real screen (including 4K), THEN
+  // duplicate that padded set for the seamless loop. This also means a
+  // single video just keeps repeating forever, which is what we want.
+  const MIN_SET_ITEMS = 24; // 24 * ~220px desktop card ≈ 5280px, wider than any monitor
+  const repeatFactor = Math.max(1, Math.ceil(MIN_SET_ITEMS / videos.length));
+  const oneSet = Array.from({ length: repeatFactor }, () => videos).flat();
+  const doubled = [...oneSet, ...oneSet];
+  // Keep the visual scroll speed consistent no matter how many elements
+  // end up in the track (more repeats shouldn't make it fly by faster).
+  const durationSec = Math.max(30, doubled.length * 1.8);
 
   return (
-    <div className="ul-gallery overflow-hidden mx-auto">
-      <div className="ul-gallery-marquee-track" style={{ '--set-count': 2 }}>
-        {doubled.map((item, i) => {
-          const posInSet = i % images.length;
-          const isCircle = posInSet % 2 === 1;
-          const href = item.link || item.image;
-          const isInternal = href.startsWith('/');
-          return (
-            <div
-              key={i}
-              className="ul-gallery-item"
-              style={{ borderRadius: isCircle ? '999px' : 'clamp(10px, 1.05vw, 20px)' }}
-            >
-              <img src={item.image} alt={`Gallery ${i + 1}`} />
-              <div className="ul-gallery-item-btn-wrapper">
-                {isInternal ? (
-                  <Link to={href}>
-                    <i className="bi bi-instagram"></i>
-                  </Link>
-                ) : (
-                  <a href={href} target="_blank" rel="noreferrer">
-                    <i className="bi bi-instagram"></i>
-                  </a>
-                )}
-              </div>
+    <div className="ul-container">
+      <section className="ul-video-gallery-section" style={{ margin: 'clamp(40px,4.2vw,80px) 0' }}>
+        <div className="ul-inner-container">
+          <div className="ul-section-heading" style={{ justifyContent: 'center', textAlign: 'center' }}>
+            <div>
+              <span className="ul-section-sub-title">{config.subtitle || 'Watch our latest collections'}</span>
+              <h2 className="ul-section-title">{config.title || 'Our Videos'}</h2>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        </div>
+
+        <div className="ul-video-gallery overflow-hidden mx-auto">
+          <div className="ul-video-gallery-track" ref={trackRef} style={{ animationDuration: `${durationSec}s` }}>
+            {doubled.map((item, i) => {
+              const href = item.link || '';
+              const isInternal = href.startsWith('/');
+              const Wrapper = href ? (isInternal ? Link : 'a') : 'div';
+              const wrapperProps = href
+                ? (isInternal ? { to: href } : { href, target: '_blank', rel: 'noreferrer' })
+                : {};
+              return (
+                <div className="ul-video-item" key={i}>
+                  <Wrapper {...wrapperProps} className="ul-video-item-inner">
+                    <video src={item.video} muted playsInline loop preload="metadata" />
+                    {item.caption && <div className="ul-video-caption">{item.caption}</div>}
+                  </Wrapper>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

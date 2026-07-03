@@ -32,7 +32,16 @@ export default function ShopPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    api.get('/categories').then(r => setCategories(r.data.data)).catch(() => {});
+    // Same source as the homepage "Shop by Category" grid and the admin
+    // product category picker: the real storefront Navigation Menu, not
+    // the old flat Categories list. Plain links with no children (Home,
+    // About Us, Contact) are filtered out automatically.
+    api.get('/menus/header').then(r => {
+      const items = (r.data.data?.items || [])
+        .filter(item => item.layout !== 'link' && (item.children?.length > 0) && item.isActive !== false)
+        .sort((a, b) => a.order - b.order);
+      setCategories(items);
+    }).catch(() => {});
   }, []);
 
   const fetchProducts = useCallback(() => {
@@ -102,16 +111,16 @@ export default function ShopPage() {
             </button>
           </li>
           {categories.map(cat => (
-            <li key={cat._id} style={{ marginBottom: 8 }}>
+            <li key={cat.label} style={{ marginBottom: 8 }}>
               <button
-                onClick={() => { setCategory(cat.slug); setPage(1); }}
+                onClick={() => { setCategory(cat.label); setPage(1); }}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  color: category === cat.slug ? '#EF2853' : '#333',
-                  fontWeight: category === cat.slug ? 600 : 400, fontSize: 14
+                  color: category === cat.label ? '#EF2853' : '#333',
+                  fontWeight: category === cat.label ? 600 : 400, fontSize: 14
                 }}
               >
-                {cat.name}
+                {cat.label}
               </button>
             </li>
           ))}

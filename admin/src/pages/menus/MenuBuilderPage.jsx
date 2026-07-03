@@ -202,6 +202,22 @@ function MenuNode({ node, depth, path, siblingCount, isExpanded, toggleExpand, p
   const hasChildren = depth < 2;
   const open = isExpanded(path);
   const idx = path[path.length - 1];
+  const [uploadingTop, setUploadingTop] = useState(false);
+  const [uploadingChild, setUploadingChild] = useState(false);
+
+  const uploadImage = async (file, onDone) => {
+    if (!file) return;
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      fd.append('folder', 'menu');
+      const { data } = await api.post('/upload/image', fd);
+      onDone(data.data.url);
+      toast.success('Image uploaded');
+    } catch {
+      toast.error('Image upload failed');
+    }
+  };
 
   return (
     <div style={{ border: '1.5px solid var(--border)', borderRadius: 10, background: meta.bg, marginLeft: depth * 18 }}>
@@ -237,11 +253,25 @@ function MenuNode({ node, depth, path, siblingCount, isExpanded, toggleExpand, p
         )}
 
         {depth === 1 && (
-          <input
-            className="form-control" style={{ maxWidth: 160, padding: '6px 10px', fontSize: 13 }}
-            value={node.image || ''} placeholder="Image URL (optional)"
-            onChange={e => patchNode(path, { image: e.target.value })}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {node.image && <img src={node.image} alt="" style={{ width: 26, height: 26, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />}
+            <input
+              className="form-control" style={{ maxWidth: 140, padding: '6px 10px', fontSize: 13 }}
+              value={node.image || ''} placeholder="Image URL"
+              onChange={e => patchNode(path, { image: e.target.value })}
+            />
+            <label className="btn btn-outline btn-sm btn-icon" title="Upload image" style={{ cursor: uploadingChild ? 'wait' : 'pointer', flexShrink: 0 }}>
+              {uploadingChild ? <i className="bi bi-hourglass-split"></i> : <i className="bi bi-upload"></i>}
+              <input type="file" accept="image/*" style={{ display: 'none' }}
+                onChange={async e => {
+                  const file = e.target.files[0];
+                  e.target.value = '';
+                  setUploadingChild(true);
+                  await uploadImage(file, (url) => patchNode(path, { image: url }));
+                  setUploadingChild(false);
+                }} />
+            </label>
+          </div>
         )}
 
         <label className="toggle" title="Visible on storefront">
@@ -261,16 +291,41 @@ function MenuNode({ node, depth, path, siblingCount, isExpanded, toggleExpand, p
         </div>
       </div>
 
-      {depth === 0 && node.layout === 'mega' && open && (
-        <div style={{ padding: '0 12px 10px', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <input className="form-control" style={{ maxWidth: 180, padding: '6px 10px', fontSize: 12.5 }} placeholder="Promo title"
-            value={node.promo?.title || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), title: e.target.value } })} />
-          <input className="form-control" style={{ maxWidth: 220, padding: '6px 10px', fontSize: 12.5 }} placeholder="Promo subtitle"
-            value={node.promo?.subtitle || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), subtitle: e.target.value } })} />
-          <input className="form-control" style={{ maxWidth: 220, padding: '6px 10px', fontSize: 12.5 }} placeholder="Promo image URL"
-            value={node.promo?.image || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), image: e.target.value } })} />
-          <input className="form-control" style={{ maxWidth: 200, padding: '6px 10px', fontSize: 12.5 }} placeholder="Promo link"
-            value={node.promo?.url || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), url: e.target.value } })} />
+      {depth === 0 && node.layout !== 'link' && open && (
+        <div style={{ padding: '0 12px 10px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <p style={{ fontSize: 11.5, color: '#888', margin: 0 }}>
+            This image is used as the card photo for this category on the homepage "Shop by Category" section
+            {node.layout === 'mega' ? ', and as the promo tile inside this item\'s mega menu.' : '.'}
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            {node.promo?.image && (
+              <img src={node.promo.image} alt="" style={{ width: 44, height: 44, borderRadius: 8, objectFit: 'cover', flexShrink: 0, border: '1px solid var(--border)' }} />
+            )}
+            <input className="form-control" style={{ maxWidth: 260, padding: '6px 10px', fontSize: 12.5 }} placeholder="Category / promo image URL"
+              value={node.promo?.image || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), image: e.target.value } })} />
+            <label className="btn btn-outline btn-sm" style={{ cursor: uploadingTop ? 'wait' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {uploadingTop ? <i className="bi bi-hourglass-split"></i> : <i className="bi bi-upload"></i>}
+              Upload Image
+              <input type="file" accept="image/*" style={{ display: 'none' }}
+                onChange={async e => {
+                  const file = e.target.files[0];
+                  e.target.value = '';
+                  setUploadingTop(true);
+                  await uploadImage(file, (url) => patchNode(path, { promo: { ...(node.promo || {}), image: url } }));
+                  setUploadingTop(false);
+                }} />
+            </label>
+            {node.layout === 'mega' && (
+              <>
+                <input className="form-control" style={{ maxWidth: 180, padding: '6px 10px', fontSize: 12.5 }} placeholder="Promo title"
+                  value={node.promo?.title || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), title: e.target.value } })} />
+                <input className="form-control" style={{ maxWidth: 220, padding: '6px 10px', fontSize: 12.5 }} placeholder="Promo subtitle"
+                  value={node.promo?.subtitle || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), subtitle: e.target.value } })} />
+                <input className="form-control" style={{ maxWidth: 200, padding: '6px 10px', fontSize: 12.5 }} placeholder="Promo link"
+                  value={node.promo?.url || ''} onChange={e => patchNode(path, { promo: { ...(node.promo || {}), url: e.target.value } })} />
+              </>
+            )}
+          </div>
         </div>
       )}
 

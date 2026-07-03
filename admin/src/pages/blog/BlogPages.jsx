@@ -130,7 +130,10 @@ export function BlogFormPage() {
       api.get(`/blog/${id}`).then(r => {
         const p = r.data.data;
         setForm({ ...p, tags: p.tags?.join(', ') || '' });
-      }).catch(() => toast.error('Failed to load post'));
+      }).catch(() => {
+        toast.error('Post not found — it may have been deleted');
+        navigate('/blog');
+      });
     }
   }, [id]);
 
@@ -141,15 +144,17 @@ export function BlogFormPage() {
     setSaving(true);
     try {
       const fd = new FormData();
-      const payload = {
-        ...form,
-        tags: typeof form.tags === 'string' ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : form.tags,
-      };
-      Object.entries(payload).forEach(([k, v]) => {
-        if (k === 'seo') fd.append(k, JSON.stringify(v));
-        else if (Array.isArray(v)) v.forEach(item => fd.append(k, item));
-        else fd.append(k, v);
-      });
+      // Only send editable fields. `form` may also contain server-populated
+      // or read-only fields (author as a populated object, _id, slug, views,
+      // createdAt/updatedAt, imagePublicId, publishedAt) picked up from the
+      // GET response — sending those back would stringify objects like
+      // `author` into "[object Object]", which Mongoose then fails to cast
+      // to an ObjectId and rejects with a 404 "Resource not found".
+      const editableFields = ['title', 'excerpt', 'content', 'category', 'isPublished'];
+      editableFields.forEach(k => fd.append(k, form[k] ?? ''));
+      fd.append('seo', JSON.stringify(form.seo || {}));
+      const tags = typeof form.tags === 'string' ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : (form.tags || []);
+      tags.forEach(t => fd.append('tags', t));
       if (imageFile) fd.append('image', imageFile);
 
       if (isEdit) {

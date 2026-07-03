@@ -7,7 +7,6 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductFormPage from './pages/products/ProductFormPage';
-import CategoriesPage from './pages/categories/CategoriesPage';
 import MenuBuilderPage from './pages/menus/MenuBuilderPage';
 import OrdersPage from './pages/orders/OrdersPage';
 import OrderDetailPage from './pages/orders/OrderDetailPage';
@@ -53,7 +52,6 @@ export default function App() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="products/new" element={<ProductFormPage />} />
           <Route path="products/:id/edit" element={<ProductFormPage />} />
-          <Route path="categories" element={<CategoriesPage />} />
           <Route path="menus" element={<MenuBuilderPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />

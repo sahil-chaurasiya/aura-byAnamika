@@ -313,6 +313,7 @@ export function HomepageBuilderPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editSection, setEditSection] = useState(null);
+  const [uploadingGallery, setUploadingGallery] = useState(null); // `${sectionKey}-${idx}` while an upload is in flight
 
   useEffect(() => {
     api.get('/homepage').then(r => setSections(r.data.data.sort((a, b) => a.order - b.order))).catch(() => {}).finally(() => setLoading(false));
@@ -332,6 +333,48 @@ export function HomepageBuilderPage() {
   };
 
   const updateConfig = (key, config) => setSections(ss => ss.map(s => s.key === key ? { ...s, config: { ...s.config, ...config } } : s));
+
+  // Gallery images can be plain URL strings (old/seeded data) or
+  // { image, link } objects (new format). Normalize to objects everywhere
+  // we read them so both shapes work.
+  const normalizeGalleryImages = (config) =>
+    (config?.images || []).map(item => typeof item === 'string' ? { image: item, link: '' } : { image: item.image || '', link: item.link || '' });
+
+  const setGalleryImages = (key, images) => updateConfig(key, { images });
+
+  const handleGalleryImageUpload = async (key, idx, file) => {
+    if (!file) return;
+    setUploadingGallery(`${key}-${idx}`);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      fd.append('folder', 'gallery');
+      const { data } = await api.post('/upload/image', fd);
+      const section = sections.find(s => s.key === key);
+      const images = normalizeGalleryImages(section.config);
+      if (idx === images.length) images.push({ image: data.data.url, link: '' });
+      else images[idx] = { ...images[idx], image: data.data.url };
+      setGalleryImages(key, images);
+      toast.success('Image uploaded');
+    } catch {
+      toast.error('Image upload failed');
+    } finally {
+      setUploadingGallery(null);
+    }
+  };
+
+  const updateGalleryLink = (key, idx, link) => {
+    const section = sections.find(s => s.key === key);
+    const images = normalizeGalleryImages(section.config);
+    images[idx] = { ...images[idx], link };
+    setGalleryImages(key, images);
+  };
+
+  const removeGalleryImage = (key, idx) => {
+    const section = sections.find(s => s.key === key);
+    const images = normalizeGalleryImages(section.config).filter((_, i) => i !== idx);
+    setGalleryImages(key, images);
+  };
 
   const SECTION_ICONS = { hero: 'bi-images', categories: 'bi-grid', products: 'bi-bag', ad: 'bi-megaphone', mostSelling: 'bi-fire', video: 'bi-play-circle', subBanners: 'bi-layout-text-window', flashSale: 'bi-lightning', reviews: 'bi-star', newsletter: 'bi-envelope', blog: 'bi-journal-text', gallery: 'bi-camera' };
 
@@ -396,6 +439,7 @@ export function HomepageBuilderPage() {
                 <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', background: '#fafafa' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))', gap: 16 }}>
                     {Object.entries(section.config || {}).map(([k, v]) => (
+                      k === 'images' ? null :
                       typeof v === 'string' ? (
                         <div key={k} className="form-group" style={{ margin: 0 }}>
                           <label className="form-label" style={{ textTransform: 'capitalize' }}>{k.replace(/([A-Z])/g, ' $1')}</label>
@@ -412,6 +456,54 @@ export function HomepageBuilderPage() {
                       ) : null
                     ))}
                   </div>
+
+                  {section.key === 'gallery' && (
+                    <div style={{ marginTop: 20 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Gallery Images</div>
+                      <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+                        Upload the photos shown in this section and set where each one should take people — a category, a product, or an external Instagram post. Leave the link blank to just open the image itself.
+                      </p>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px,1fr))', gap: 14 }}>
+                        {normalizeGalleryImages(section.config).map((item, idx) => (
+                          <div key={idx} className="card" style={{ padding: 10 }}>
+                            <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', borderRadius: 8, overflow: 'hidden', background: '#eee', marginBottom: 8 }}>
+                              {item.image && <img src={item.image} alt={`Gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                              {uploadingGallery === `${section.key}-${idx}` && (
+                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <i className="bi bi-hourglass-split"></i>
+                                </div>
+                              )}
+                            </div>
+                            <label className="btn btn-outline btn-sm" style={{ width: '100%', textAlign: 'center', marginBottom: 8, cursor: 'pointer', display: 'block' }}>
+                              <i className="bi bi-upload"></i> {item.image ? 'Replace Image' : 'Upload Image'}
+                              <input type="file" accept="image/*" style={{ display: 'none' }}
+                                onChange={e => handleGalleryImageUpload(section.key, idx, e.target.files[0])} />
+                            </label>
+                            <input className="form-control" style={{ fontSize: 12, marginBottom: 8 }}
+                              placeholder="Link URL (optional)"
+                              value={item.link} onChange={e => updateGalleryLink(section.key, idx, e.target.value)} />
+                            <button type="button" className="btn btn-outline btn-sm" style={{ width: '100%', color: '#d33' }}
+                              onClick={() => removeGalleryImage(section.key, idx)}>
+                              <i className="bi bi-trash"></i> Remove
+                            </button>
+                          </div>
+                        ))}
+
+                        <label className="card" style={{ padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 190, cursor: 'pointer', border: '2px dashed var(--border)' }}>
+                          {uploadingGallery === `${section.key}-${normalizeGalleryImages(section.config).length}` ? (
+                            <i className="bi bi-hourglass-split" style={{ fontSize: 22 }}></i>
+                          ) : (
+                            <>
+                              <i className="bi bi-plus-circle" style={{ fontSize: 22, color: 'var(--muted)' }}></i>
+                              <span style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>Add Image</span>
+                            </>
+                          )}
+                          <input type="file" accept="image/*" style={{ display: 'none' }}
+                            onChange={e => handleGalleryImageUpload(section.key, normalizeGalleryImages(section.config).length, e.target.files[0])} />
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

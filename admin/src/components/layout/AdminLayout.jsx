@@ -9,7 +9,6 @@ const NAV = [
   ]},
   { group: 'Store', items: [
     { to: '/products', label: 'Products', icon: 'bi-box-seam' },
-    { to: '/categories', label: 'Categories', icon: 'bi-tags' },
     { to: '/menus', label: 'Navigation Menu', icon: 'bi-list-ul' },
     { to: '/orders', label: 'Orders', icon: 'bi-bag-check' },
     { to: '/coupons', label: 'Coupons', icon: 'bi-ticket-perforated' },

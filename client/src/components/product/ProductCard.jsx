@@ -86,8 +86,8 @@ export default function ProductCard({ product }) {
           <Link to={`/shop/${product.slug}`}>{product.name}</Link>
         </h4>
         <h5 className="ul-product-category">
-          <Link to={`/shop?category=${product.category?.slug || ''}`}>
-            {product.category?.name || 'Fashion'}
+          <Link to={`/shop?category=${encodeURIComponent(product.categories?.[0]?.label || '')}`}>
+            {product.categories?.[0]?.label || 'Fashion'}
           </Link>
         </h5>
 

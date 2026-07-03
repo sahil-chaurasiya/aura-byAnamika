@@ -23,6 +23,7 @@ const DEFAULT_MENUS = {
 
       {
         label: 'New Arrivals', url: '/shop?newArrival=true', order: 1, isActive: true, layout: 'simple',
+        promo: { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop', title: '', subtitle: '', url: '' },
         children: [
           cat('Just In', [], { url: '/shop?newArrival=true&sort=newest' }),
           cat('Trending Now', [], { url: '/shop?search=trending' }),
@@ -32,7 +33,7 @@ const DEFAULT_MENUS = {
 
       {
         label: 'Women', url: '/shop', order: 2, isActive: true, layout: 'mega',
-        promo: { image: '', title: 'Bridal Edit', subtitle: 'Curated lehengas for your big day', url: '/shop?search=Bridal Lehengas' },
+        promo: { image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=400&fit=crop', title: 'Bridal Edit', subtitle: 'Curated lehengas for your big day', url: '/shop?search=Bridal Lehengas' },
         children: [
           cat('Lehengas', ['Bridal Lehengas', 'Bridesmaid Lehengas', 'Designer Lehengas', 'Festive Lehengas', 'Reception Lehengas']),
           cat('Sarees', ['Banarasi Sarees', 'Chanderi Sarees', 'Silk Sarees', 'Organza Sarees', 'Tissue Sarees', 'Designer Sarees', 'Printed Sarees', 'Everyday Sarees']),
@@ -51,6 +52,7 @@ const DEFAULT_MENUS = {
 
       {
         label: 'Shop by Occasion', url: '#', order: 3, isActive: true, layout: 'mega',
+        promo: { image: 'https://images.unsplash.com/photo-1519657337289-077653f724ed?w=400&h=400&fit=crop', title: '', subtitle: '', url: '' },
         children: [
           cat('Bridal Collection', []), cat('Wedding Guest', []), cat('Engagement', []),
           cat('Reception', []), cat('Haldi', []), cat('Mehendi', []), cat('Sangeet', []),
@@ -61,6 +63,7 @@ const DEFAULT_MENUS = {
 
       {
         label: 'Collections', url: '#', order: 4, isActive: true, layout: 'simple',
+        promo: { image: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&fit=crop', title: '', subtitle: '', url: '' },
         children: [
           cat('Wedding Collection', []), cat('Festive Collection', []), cat('Heritage Collection', []),
           cat('Summer Collection', []), cat('Luxury Collection', []), cat('Designer Edit', []),
@@ -69,16 +72,19 @@ const DEFAULT_MENUS = {
 
       {
         label: 'Ready to Ship', url: '#', order: 5, isActive: true, layout: 'simple',
+        promo: { image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=400&fit=crop', title: '', subtitle: '', url: '' },
         children: [cat('48 Hours Dispatch', []), cat('Ready to Wear', [])],
       },
 
       {
         label: 'Accessories', url: '#', order: 6, isActive: true, layout: 'simple',
+        promo: { image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop', title: '', subtitle: '', url: '' },
         children: [cat('Dupattas', []), cat('Potli Bags', []), cat('Belts', []), cat('Jewellery', [])],
       },
 
       {
         label: 'Sale', url: '/shop?onSale=true', order: 7, isActive: true, layout: 'simple', badge: 'Sale',
+        promo: { image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop', title: '', subtitle: '', url: '' },
         children: [
           cat('Up to 30% Off', [], { url: '/shop?onSale=true&search=30' }),
           cat('Up to 50% Off', [], { url: '/shop?onSale=true&search=50' }),
@@ -88,6 +94,7 @@ const DEFAULT_MENUS = {
 
       {
         label: 'Custom Services', url: '#', order: 8, isActive: true, layout: 'simple',
+        promo: { image: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=400&h=400&fit=crop', title: '', subtitle: '', url: '' },
         children: [cat('Custom Stitching', []), cat('Size Guide', [], { url: '/faq' }), cat('Bridal Consultation', []), cat('Personal Styling', [])],
       },
 

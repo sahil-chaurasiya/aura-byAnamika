@@ -160,8 +160,8 @@ export function MostSellingSection({ config = {} }) {
                         <Link to={`/shop/${product.slug}`}>{product.name}</Link>
                       </h4>
                       <h5 className="ul-product-category">
-                        <Link to={`/shop?category=${product.category?.slug || ''}`}>
-                          {product.category?.name || 'Fashion'}
+                        <Link to={`/shop?category=${encodeURIComponent(product.categories?.[0]?.label || '')}`}>
+                          {product.categories?.[0]?.label || 'Fashion'}
                         </Link>
                       </h5>
                       <div className="ul-product-rating">
@@ -466,16 +466,21 @@ export function BlogSection({ config = {} }) {
 // ─── INSTAGRAM GALLERY ────────────────────────────────────────────
 export function GallerySection({ config = {} }) {
   const defaultImages = [
-    'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&fit=crop',
+    { image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=400&fit=crop', link: '' },
+    { image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop', link: '' },
+    { image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop', link: '' },
+    { image: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&fit=crop', link: '' },
+    { image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=400&fit=crop', link: '' },
+    { image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=400&fit=crop', link: '' },
+    { image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop', link: '' },
+    { image: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&fit=crop', link: '' },
   ];
-  const images = (config.images && config.images.length) ? config.images : defaultImages;
+  // Backward-compatible: older/seeded configs store images as plain URL
+  // strings. Normalize everything to { image, link } so both shapes work.
+  const rawImages = (config.images && config.images.length) ? config.images : defaultImages;
+  const images = rawImages.map(item =>
+    typeof item === 'string' ? { image: item, link: '' } : { image: item.image, link: item.link || '' }
+  );
 
   // Duplicate: render set A + set B side by side.
   // Animate: slide the track left by exactly 50% (= one full set width).
@@ -487,20 +492,28 @@ export function GallerySection({ config = {} }) {
   return (
     <div className="ul-gallery overflow-hidden mx-auto">
       <div className="ul-gallery-marquee-track" style={{ '--set-count': 2 }}>
-        {doubled.map((img, i) => {
+        {doubled.map((item, i) => {
           const posInSet = i % images.length;
           const isCircle = posInSet % 2 === 1;
+          const href = item.link || item.image;
+          const isInternal = href.startsWith('/');
           return (
             <div
               key={i}
               className="ul-gallery-item"
               style={{ borderRadius: isCircle ? '999px' : 'clamp(10px, 1.05vw, 20px)' }}
             >
-              <img src={img} alt={`Gallery ${i + 1}`} />
+              <img src={item.image} alt={`Gallery ${i + 1}`} />
               <div className="ul-gallery-item-btn-wrapper">
-                <a href={img} target="_blank" rel="noreferrer">
-                  <i className="bi bi-instagram"></i>
-                </a>
+                {isInternal ? (
+                  <Link to={href}>
+                    <i className="bi bi-instagram"></i>
+                  </Link>
+                ) : (
+                  <a href={href} target="_blank" rel="noreferrer">
+                    <i className="bi bi-instagram"></i>
+                  </a>
+                )}
               </div>
             </div>
           );

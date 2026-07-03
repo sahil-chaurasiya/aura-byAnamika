@@ -11,12 +11,14 @@ export default function ProductFormPage() {
   const isEdit = !!id;
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [menuGroups, setMenuGroups] = useState([]); // header nav, filtered to real category groups
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [categorySearch, setCategorySearch] = useState('');
   const [uploadingImages, setUploadingImages] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
 
   const [form, setForm] = useState({
-    name: '', description: '', shortDescription: '', category: '',
+    name: '', description: '', shortDescription: '', categories: [],
     price: '', salePrice: '', stock: 0, sku: '',
     isFeatured: false, isNewArrival: false, isBestSeller: false, isActive: true,
     sizes: [], colors: [], tags: '',
@@ -28,7 +30,20 @@ export default function ProductFormPage() {
   const [newColor, setNewColor] = useState({ name: '', hex: '#000000' });
 
   useEffect(() => {
-    api.get('/categories').then(r => setCategories(r.data.data)).catch(() => {});
+    // Pull real categories/sub-categories straight from the storefront
+    // Navigation Menu (same data the Menu Builder edits) instead of the
+    // old flat Categories list, so products can only ever be tagged with
+    // categories that actually exist in the live nav. "Home", "About Us",
+    // "Contact" etc. are plain links with no children -- not categories --
+    // so they're filtered out automatically.
+    api.get('/menus/header').then(r => {
+      const items = (r.data.data?.items || [])
+        .filter(item => item.layout !== 'link' && (item.children?.length > 0) && item.isActive !== false)
+        .sort((a, b) => a.order - b.order);
+      setMenuGroups(items);
+      setExpandedGroups(Object.fromEntries(items.map(g => [g.label, true])));
+    }).catch(() => {});
+
     if (isEdit) {
       setLoading(true);
       api.get(`/products/${id}`)
@@ -41,6 +56,7 @@ export default function ProductFormPage() {
             tags: p.tags?.join(', ') || '',
             colors: p.colors || [],
             sizes: p.sizes || [],
+            categories: p.categories || [],
           });
         })
         .catch(() => toast.error('Failed to load product'))
@@ -50,6 +66,28 @@ export default function ProductFormPage() {
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
   const setSeo = (key, val) => setForm(f => ({ ...f, seo: { ...f.seo, [key]: val } }));
+
+  const isCategorySelected = (label) => form.categories.some(c => c.label === label);
+  const toggleCategory = (label, group) => {
+    set('categories', isCategorySelected(label)
+      ? form.categories.filter(c => c.label !== label)
+      : [...form.categories, { label, group }]);
+  };
+  const toggleGroupExpanded = (label) => setExpandedGroups(g => ({ ...g, [label]: !g[label] }));
+
+  // Simple search filter across every category + sub-category label,
+  // keeping a group visible if any of its children match.
+  const filteredMenuGroups = categorySearch.trim()
+    ? menuGroups
+        .map(group => ({
+          ...group,
+          children: (group.children || []).filter(child =>
+            child.label.toLowerCase().includes(categorySearch.toLowerCase()) ||
+            (child.children || []).some(sub => sub.label.toLowerCase().includes(categorySearch.toLowerCase()))
+          ),
+        }))
+        .filter(group => group.label.toLowerCase().includes(categorySearch.toLowerCase()) || group.children.length > 0)
+    : menuGroups;
 
   const handleImageUpload = async (files) => {
     if (!files.length) return;
@@ -92,8 +130,8 @@ export default function ProductFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.category || !form.description) {
-      toast.error('Please fill required fields: Name, Price, Category, Description');
+    if (!form.name || !form.price || !form.categories?.length || !form.description) {
+      toast.error('Please fill required fields: Name, Price, at least one Category, Description');
       return;
     }
     setSaving(true);
@@ -183,11 +221,65 @@ export default function ProductFormPage() {
                     <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Supports HTML tags for formatting</p>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Category *</label>
-                    <select className="form-control" required value={form.category?._id || form.category || ''} onChange={e => set('category', e.target.value)}>
-                      <option value="">Select a category</option>
-                      {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-                    </select>
+                    <label className="form-label">Categories *</label>
+                    <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: -4, marginBottom: 10 }}>
+                      Pulled straight from Navigation Menu — pick any number of categories and sub-categories. Manage the list itself under Navigation Menu.
+                    </p>
+
+                    {form.categories?.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                        {form.categories.map(c => (
+                          <span key={c.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fdeef1', color: '#EF2853', borderRadius: 999, padding: '4px 6px 4px 12px', fontSize: 12.5, fontWeight: 500 }}>
+                            {c.label}
+                            <button type="button" onClick={() => toggleCategory(c.label, c.group)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF2853', fontSize: 15, lineHeight: 1, padding: '0 4px' }}>×</button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <input className="form-control" placeholder="Search categories & sub-categories..."
+                      value={categorySearch} onChange={e => setCategorySearch(e.target.value)}
+                      style={{ marginBottom: 10 }} />
+
+                    <div style={{ border: '1.5px solid var(--border)', borderRadius: 10, maxHeight: 340, overflowY: 'auto', padding: 8 }}>
+                      {menuGroups.length === 0 && (
+                        <p style={{ fontSize: 13, color: 'var(--muted)', padding: 8 }}>Loading categories from Navigation Menu...</p>
+                      )}
+                      {filteredMenuGroups.map(group => (
+                        <div key={group.label} style={{ marginBottom: 4 }}>
+                          <button type="button" onClick={() => toggleGroupExpanded(group.label)}
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', background: '#fafafa', border: 'none', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', fontWeight: 700, fontSize: 12.5, textTransform: 'uppercase', letterSpacing: '.03em', color: '#555' }}>
+                            <i className={`bi bi-chevron-${expandedGroups[group.label] ? 'down' : 'right'}`} style={{ fontSize: 11 }}></i>
+                            {group.label}
+                          </button>
+                          {expandedGroups[group.label] && (
+                            <div style={{ padding: '6px 4px 4px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              {(group.children || []).map(child => (
+                                <div key={child.label}>
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 6px', borderRadius: 6, cursor: 'pointer', fontSize: 13.5 }}>
+                                    <input type="checkbox" checked={isCategorySelected(child.label)}
+                                      onChange={() => toggleCategory(child.label, group.label)} />
+                                    {child.label}
+                                  </label>
+                                  {(child.children || []).length > 0 && (
+                                    <div style={{ paddingLeft: 26, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                      {child.children.map(sub => (
+                                        <label key={sub.label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', borderRadius: 6, cursor: 'pointer', fontSize: 13, color: '#555' }}>
+                                          <input type="checkbox" checked={isCategorySelected(sub.label)}
+                                            onChange={() => toggleCategory(sub.label, group.label)} />
+                                          {sub.label}
+                                        </label>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Tags (comma-separated)</label>

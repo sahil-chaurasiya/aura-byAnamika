@@ -12,12 +12,28 @@ const variantSchema = new mongoose.Schema({
   image: String,
 });
 
+// A product's categories are picked from the storefront Navigation Menu
+// tree (Admin > Navigation Menu), not a separate flat category list --
+// so what a shopper sees in the nav and what a product is tagged with are
+// always the same real categories/sub-categories. `label` is the exact
+// category or sub-category label picked (e.g. "Silk Sarees" or "Sarees"),
+// `group` is the top-level menu item it lives under (e.g. "Women") so we
+// can also filter/link by the broader group. A product may have several.
+const productCategorySchema = new mongoose.Schema({
+  label: { type: String, required: true },
+  group: { type: String, required: true },
+}, { _id: false });
+
 const productSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'Product name is required'], trim: true },
   slug: { type: String, unique: true },
   description: { type: String, required: [true, 'Product description is required'] },
   shortDescription: String,
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+  categories: {
+    type: [productCategorySchema],
+    required: true,
+    validate: { validator: v => Array.isArray(v) && v.length > 0, message: 'Select at least one category' },
+  },
   tags: [String],
 
   // Pricing
@@ -84,7 +100,8 @@ productSchema.pre('save', function (next) {
 });
 
 productSchema.index({ name: 'text', description: 'text', tags: 'text' });
-productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ 'categories.label': 1, isActive: 1 });
+productSchema.index({ 'categories.group': 1, isActive: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ ratings: -1 });
 

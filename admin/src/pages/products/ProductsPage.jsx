@@ -125,7 +125,7 @@ export default function ProductsPage() {
                       </div>
                     </div>
                   </td>
-                  <td><span style={{ fontSize: 13 }}>{product.category?.name || '—'}</span></td>
+                  <td><span style={{ fontSize: 13 }}>{product.categories?.length ? product.categories.map(c => c.label).join(', ') : '—'}</span></td>
                   <td>
                     <div style={{ fontWeight: 600, fontSize: 13 }}>
                       ${(product.salePrice || product.price)?.toFixed(2)}

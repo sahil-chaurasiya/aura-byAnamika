@@ -1,10 +1,20 @@
 const Product = require('../models/Product');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../middleware/upload');
 
+// Escape a string for safe use inside a RegExp (category labels/groups can
+// contain characters like & or ( ) e.g. "Kurtas & Kurtis").
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Helper: apply filters
 const buildFilter = (query) => {
   const filter = { isActive: true };
-  if (query.category) filter.category = query.category;
+  if (query.category) {
+    // A single ?category= value can be either a top-level menu group
+    // (e.g. "Women") or a specific category/sub-category label
+    // (e.g. "Silk Sarees") -- match either, case-insensitively.
+    const re = new RegExp(`^${escapeRegex(query.category)}$`, 'i');
+    filter.$or = [{ 'categories.label': re }, { 'categories.group': re }];
+  }
   if (query.search) filter.$text = { $search: query.search };
   if (query.minPrice || query.maxPrice) {
     filter.price = {};
@@ -41,7 +51,7 @@ const getProducts = async (req, res) => {
   const filter = buildFilter(req.query);
 
   const [products, total] = await Promise.all([
-    Product.find(filter).populate('category', 'name slug').sort(sort).skip(skip).limit(limit).lean(),
+    Product.find(filter).sort(sort).skip(skip).limit(limit).lean(),
     Product.countDocuments(filter),
   ]);
 
@@ -57,7 +67,7 @@ const getProducts = async (req, res) => {
 const getProduct = async (req, res) => {
   const { slug } = req.params;
   const query = slug.match(/^[0-9a-fA-F]{24}$/) ? { _id: slug } : { slug };
-  const product = await Product.findOne(query).populate('category', 'name slug');
+  const product = await Product.findOne(query);
   if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
   res.json({ success: true, data: product });
 };
@@ -67,8 +77,9 @@ const getProduct = async (req, res) => {
 const getRelatedProducts = async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+  const labels = (product.categories || []).map(c => c.label);
   const related = await Product.find({
-    category: product.category,
+    'categories.label': { $in: labels },
     _id: { $ne: product._id },
     isActive: true,
   }).limit(8).lean();
@@ -133,12 +144,15 @@ const getAdminProducts = async (req, res) => {
   const skip = (page - 1) * limit;
   const filter = {};
   if (req.query.search) filter.$text = { $search: req.query.search };
-  if (req.query.category) filter.category = req.query.category;
+  if (req.query.category) {
+    const re = new RegExp(`^${escapeRegex(req.query.category)}$`, 'i');
+    filter.$or = [{ 'categories.label': re }, { 'categories.group': re }];
+  }
   if (req.query.status === 'active') filter.isActive = true;
   if (req.query.status === 'inactive') filter.isActive = false;
 
   const [products, total] = await Promise.all([
-    Product.find(filter).populate('category', 'name').sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     Product.countDocuments(filter),
   ]);
   res.json({ success: true, data: products, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });

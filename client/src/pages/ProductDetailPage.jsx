@@ -366,7 +366,17 @@ export default function ProductDetailPage() {
                   {/* Meta */}
                   <div style={{ marginTop: 24, fontSize: 14, color: '#666', display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {product.sku && <div><strong>SKU:</strong> {product.sku}</div>}
-                    {product.category && <div><strong>Category:</strong> <Link to={`/shop?category=${product.category.slug}`} style={{ color: '#EF2853' }}>{product.category.name}</Link></div>}
+                    {product.categories?.length > 0 && (
+                      <div>
+                        <strong>{product.categories.length > 1 ? 'Categories:' : 'Category:'}</strong>{' '}
+                        {product.categories.map((c, i) => (
+                          <React.Fragment key={c.label}>
+                            {i > 0 && ', '}
+                            <Link to={`/shop?category=${encodeURIComponent(c.label)}`} style={{ color: '#EF2853' }}>{c.label}</Link>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
                     {product.tags?.length > 0 && (
                       <div><strong>Tags:</strong> {product.tags.map(tag => (
                         <Link key={tag} to={`/shop?tags=${tag}`} style={{ color: '#EF2853', marginRight: 6 }}>#{tag}</Link>

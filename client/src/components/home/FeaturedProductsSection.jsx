@@ -30,16 +30,19 @@ export default function FeaturedProductsSection({ config = {} }) {
         : api.get(`/products?featured=true&limit=${limit}`);
     });
 
-    Promise.all([
+    Promise.allSettled([
       ...requests,
       // Legacy fallback only used when a row has no banner image configured yet.
+      // Fetched separately from products so an ad-blocker killing this call
+      // (URLs containing "banner" commonly get blocked) can't wipe out the
+      // product rows below.
       api.get('/banners?type=collection'),
     ]).then((results) => {
       const bannerRes = results[results.length - 1];
       const productResults = results.slice(0, rows.length);
-      setRowProducts(productResults.map(r => r.data.data || []));
-      setLegacyBanners(bannerRes.data.data || []);
-    }).catch(() => {}).finally(() => setLoading(false));
+      setRowProducts(productResults.map(r => (r.status === 'fulfilled' ? r.value.data.data || [] : [])));
+      setLegacyBanners(bannerRes.status === 'fulfilled' ? bannerRes.value.data.data || [] : []);
+    }).finally(() => setLoading(false));
   }, [JSON.stringify(rows)]);
 
   const SWIPER_OPTS = {

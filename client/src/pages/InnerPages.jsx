@@ -8,6 +8,19 @@ import { logoutUser } from '../store/slices/authSlice';
 import { selectSettings } from '../store/slices/settingsSlice';
 import toast from 'react-hot-toast';
 
+// Real customer photos would normally be uploaded via Media Library and
+// wired into Settings; using a curated set of stock photos as placeholders
+// for the About page's "Customer Diaries" marquee until that's in place.
+const CUSTOMER_DIARY_PHOTOS = [
+  'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=500&fit=crop',
+  'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=500&fit=crop',
+  'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=500&fit=crop',
+  'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=500&fit=crop',
+  'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=500&fit=crop',
+  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=500&fit=crop',
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=500&fit=crop',
+];
+
 // ──── BLOG PAGE ──────────────────────────────────────────────────
 export function BlogPage() {
   const [posts, setPosts] = useState([]);
@@ -170,19 +183,18 @@ export function AboutPage() {
           </div>
         </div>
 
-        {/* Team */}
+        {/* Customer Diaries */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <span className="ul-section-sub-title">Our People</span>
-          <h2 className="ul-section-title">Meet the Team</h2>
+          <span className="ul-section-sub-title">Customer Diaries</span>
+          <h2 className="ul-section-title">Our Happy Customers</h2>
         </div>
-        <div className="row row-cols-md-4 row-cols-2 ul-bs-row">
-          {[{ name: 'Sarah Johnson', role: 'CEO & Founder', img: 'https://randomuser.me/api/portraits/women/44.jpg' }, { name: 'Michael Chen', role: 'Creative Director', img: 'https://randomuser.me/api/portraits/men/32.jpg' }, { name: 'Emma Williams', role: 'Head of Design', img: 'https://randomuser.me/api/portraits/women/68.jpg' }, { name: 'David Martinez', role: 'Marketing Lead', img: 'https://randomuser.me/api/portraits/men/75.jpg' }].map(member => (
-            <div key={member.name} className="col">
-              <div style={{ textAlign: 'center' }}>
-                <img src={member.img} alt={member.name} style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '4px solid #FEF4F6', marginBottom: 12 }} />
-                <h4 style={{ fontWeight: 600, marginBottom: 4 }}>{member.name}</h4>
-                <p style={{ color: '#EF2853', fontSize: 14 }}>{member.role}</p>
-              </div>
+      </div>
+
+      <div className="ul-customer-diaries">
+        <div className="ul-customer-diaries-track">
+          {[...CUSTOMER_DIARY_PHOTOS, ...CUSTOMER_DIARY_PHOTOS].map((src, i) => (
+            <div className="ul-customer-diaries-item" key={i}>
+              <img src={src} alt={`Customer ${(i % CUSTOMER_DIARY_PHOTOS.length) + 1}`} />
             </div>
           ))}
         </div>

@@ -2178,6 +2178,35 @@ button {
   color: var(--black);
 }
 
+/* ── CUSTOMER DIARIES (About page) — same infinite marquee technique,
+   plain rectangular photos, no overlay/buttons ── */
+.ul-customer-diaries {
+  padding-bottom: clamp(40px, 4.2vw, 80px);
+  overflow: hidden;
+}
+
+.ul-customer-diaries-track {
+  display: flex;
+  gap: clamp(6px, 0.7vw, 14px);
+  width: max-content;
+  animation: ul-gallery-scroll 22s linear infinite;
+}
+
+.ul-customer-diaries:hover .ul-customer-diaries-track {
+  animation-play-state: paused;
+}
+
+.ul-customer-diaries-item {
+  flex: 0 0 clamp(150px, 13.5vw, 230px);
+}
+
+.ul-customer-diaries-item img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}
+
 .ul-footer {
   background-color: var(--black);
 }

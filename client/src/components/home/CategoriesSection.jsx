@@ -37,7 +37,7 @@ export default function CategoriesSection() {
                     <span>{cat.label}</span>
                   </div>
                   <div className="ul-category-btn">
-                    <span><i className="bi bi-arrow-right"></i></span>
+                    <span><i className="bi bi-chevron-right"></i></span>
                   </div>
                 </Link>
               </div>

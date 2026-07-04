@@ -393,15 +393,22 @@ export function HomepageBuilderPage() {
       const fd = new FormData();
       fd.append('video', file);
       fd.append('folder', 'videos');
-      const { data } = await api.post('/upload/video', fd);
+      // Video uploads are two hops (browser -> our server -> Cloudinary), so
+      // the default 15s API timeout is too short and was causing silent
+      // failures on anything more than a couple MB. Give this one call a much
+      // longer ceiling (3 min) without touching the global default.
+      const { data } = await api.post('/upload/video', fd, { timeout: 180000 });
       const section = sections.find(s => s.key === key);
       const videos = normalizeGalleryVideos(section.config);
       if (idx === videos.length) videos.push({ video: data.data.url, link: '', caption: '' });
       else videos[idx] = { ...videos[idx], video: data.data.url };
       setGalleryVideos(key, videos);
       toast.success('Video uploaded');
-    } catch {
-      toast.error('Video upload failed');
+    } catch (err) {
+      const message = err.code === 'ECONNABORTED'
+        ? 'Video upload timed out — try a smaller file or a faster connection'
+        : (err.response?.data?.message || 'Video upload failed');
+      toast.error(message);
     } finally {
       setUploadingGallery(null);
     }
@@ -668,7 +675,7 @@ export function HomepageBuilderPage() {
                             <label className="btn btn-outline btn-sm" style={{ width: '100%', textAlign: 'center', marginBottom: 8, cursor: 'pointer', display: 'block' }}>
                               <i className="bi bi-upload"></i> {item.video ? 'Replace Video' : 'Upload Video'}
                               <input type="file" accept="video/*" style={{ display: 'none' }}
-                                onChange={e => handleGalleryVideoUpload(section.key, idx, e.target.files[0])} />
+                                onChange={e => { const f = e.target.files[0]; e.target.value = ''; handleGalleryVideoUpload(section.key, idx, f); }} />
                             </label>
                             <input className="form-control" style={{ fontSize: 12, marginBottom: 8 }}
                               placeholder="Link URL (optional)"
@@ -693,7 +700,7 @@ export function HomepageBuilderPage() {
                             </>
                           )}
                           <input type="file" accept="video/*" style={{ display: 'none' }}
-                            onChange={e => handleGalleryVideoUpload(section.key, normalizeGalleryVideos(section.config).length, e.target.files[0])} />
+                            onChange={e => { const f = e.target.files[0]; const nextIdx = normalizeGalleryVideos(section.config).length; e.target.value = ''; handleGalleryVideoUpload(section.key, nextIdx, f); }} />
                         </label>
                       </div>
                     </div>

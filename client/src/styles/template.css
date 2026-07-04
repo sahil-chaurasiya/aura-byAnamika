@@ -1070,9 +1070,6 @@ button {
   font-size: 22px;
   color: var(--black);
 }
-.ul-banner-slider-nav button:first-child {
-  transform: rotate(180deg);
-}
 @media screen and (max-width: 479px) {
   .ul-banner-slider-nav button:first-child {
     transform: rotate(90deg);
@@ -1267,6 +1264,9 @@ button {
 }
 .ul-category-btn span i {
   padding-top: 4px;
+  font-size: 1.4em;
+  font-weight: bold;
+  -webkit-text-stroke: 0.5px currentColor;
 }
 
 .ul-products {

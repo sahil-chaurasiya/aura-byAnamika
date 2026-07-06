@@ -1015,11 +1015,26 @@ button {
   }
 }
 .ul-banner-slider-wrapper {
-  width: max-content;
+  /* Fixed, viewport-derived width instead of max-content.
+     max-content made this box's size depend on the <img>'s natural
+     dimensions, which aren't known until the (network-loaded) image
+     finishes downloading. Swiper measures the slider width on mount,
+     before that happens, so it locks in a wrong width; when the image
+     then loads and the box resizes, Swiper's loop-mode clone slides
+     don't get repositioned correctly, and the very first slide
+     transition shows the misaligned/overlapping clones. Matching the
+     width to .ul-banner-slider's own clamp() removes the dependency
+     on image load timing entirely. */
+  width: clamp(310px, 59.12vw, 1125px);
   position: relative;
   z-index: 11;
   background-color: var(--white);
   position: relative;
+}
+@media screen and (max-width: 767px) {
+  .ul-banner-slider-wrapper {
+    width: calc(100vw - clamp(15px, 3.15vw, 60px) * 2);
+  }
 }
 .ul-banner-slider-wrapper::before, .ul-banner-slider-wrapper::after {
   content: "";

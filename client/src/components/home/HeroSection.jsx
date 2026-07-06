@@ -51,9 +51,22 @@ export default function HeroSection() {
 
   useEffect(() => {
     api.get('/hero')
-      .then(r => { if (r.data.data?.length) setSlides(r.data.data); })
+      .then(r => {
+        if (r.data.data?.length) {
+          // Reset so the main swiper doesn't briefly bind to a thumbs
+          // instance that's about to be torn down and recreated.
+          setThumbsSwiper(null);
+          setSlides(r.data.data);
+        }
+      })
       .catch(() => {});
   }, []);
+
+  // Identity of the current slide set. Changing this forces React to fully
+  // unmount/remount the Swiper instances (via `key`) instead of patching new
+  // slides into an already-initialized loop-mode instance in place, which is
+  // what causes misaligned/overlapping clone slides after a data swap.
+  const slidesKey = slides.map(s => s._id || s.image).join('|');
 
   return (
     <div className="overflow-hidden">
@@ -65,6 +78,7 @@ export default function HeroSection() {
           <div className="ul-banner-slider-wrapper">
             <div className="ul-banner-slider">
               <Swiper
+                key={`main-${slidesKey}`}
                 modules={[Navigation, Autoplay, Thumbs]}
                 slidesPerView={1}
                 loop
@@ -135,6 +149,7 @@ export default function HeroSection() {
           <div className="ul-banner-img-slider-wrapper">
             <div className="ul-banner-img-slider">
               <Swiper
+                key={`thumb-${slidesKey}`}
                 modules={[Autoplay, Thumbs]}
                 onSwiper={setThumbsSwiper}
                 loop

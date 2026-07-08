@@ -163,7 +163,7 @@ export default function ProductDetailPage() {
                           <img
                             src={img.url}
                             alt={img.alt || product.name}
-                            style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', borderRadius: 20 }}
+                            style={{ width: '100%', aspectRatio: '9/16', objectFit: 'contain', backgroundColor: '#f7f7f7', borderRadius: 20 }}
                           />
                         </div>
                       </SwiperSlide>

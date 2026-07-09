@@ -18,10 +18,13 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
 
-// Product images only: no file size cap (still images-only via fileFilter).
+// Product images only: capped at 30MB on the way in. Real compression
+// happens after upload via sharp, so this limit just guards against
+// truly oversized files (e.g. someone uploading a RAW photo by mistake).
 const uploadProductImage = multer({
   storage,
   fileFilter,
+  limits: { fileSize: 30 * 1024 * 1024 }, // 30MB
 });
 
 // Video uploads (e.g. the homepage "Our Videos" reel marquee) need their

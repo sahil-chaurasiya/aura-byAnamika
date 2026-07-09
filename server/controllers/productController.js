@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const sharp = require('sharp');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../middleware/upload');
 
 // Escape a string for safe use inside a RegExp (category labels/groups can
@@ -124,7 +125,17 @@ const uploadProductImages = async (req, res) => {
 
   const uploadedImages = [];
   for (const file of req.files) {
-    const result = await uploadToCloudinary(file.buffer, 'products');
+    // .rotate() with no args reads the EXIF orientation tag (set by phone
+    // cameras held sideways/upside down) and bakes it into the actual pixels
+    // before we resize/compress — otherwise that tag gets lost and the
+    // image displays rotated everywhere except where EXIF is respected.
+    const optimizedBuffer = await sharp(file.buffer)
+      .rotate()
+      .resize({ width: 2000, withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    const result = await uploadToCloudinary(optimizedBuffer, 'products');
     uploadedImages.push({ url: result.secure_url, publicId: result.public_id, alt: product.name });
   }
 

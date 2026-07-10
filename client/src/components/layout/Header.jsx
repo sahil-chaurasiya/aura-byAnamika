@@ -95,14 +95,17 @@ export default function Header() {
     setMobileExpanded(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const announcementText = settings.announcement_text || 'Free shipping on orders over $100 -- shop the new festive edit';
-
   return (
     <header className="amh-root" style={{ '--amh-p': primary, '--amh-s': secondary }}>
       {/* GRADIENT ANNOUNCEMENT STRIP -- matches the site's signature pink-to-orange gradient */}
       <div className="amh-announce">
         <i className="bi bi-stars" aria-hidden="true"></i>
-        <span>{announcementText}</span>
+        <div className="amh-marquee">
+          <div className="amh-marquee-track">
+            <span>New Arrivals | Starting at ₹299 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Celebrate in Style | Up to 50% OFF &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rakhi Sale is Live! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span aria-hidden="true">New Arrivals | Starting at ₹299 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Celebrate in Style | Up to 50% OFF &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rakhi Sale is Live! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          </div>
+        </div>
       </div>
 
       {/* MAIN BAR: logo + pill search + icons */}
@@ -253,7 +256,11 @@ export default function Header() {
 
         /* gradient announcement strip, matches .ul-header-top */
         .amh-announce { background: var(--amh-grad); color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 9px 16px; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: .03em; text-align: center; }
-        .amh-announce i { font-size: 12px; }
+        .amh-announce i { font-size: 12px; flex-shrink: 0; }
+        .amh-marquee { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; }
+        .amh-marquee-track { display: inline-flex; width: max-content; animation: amh-marquee-scroll 20s linear infinite; }
+        .amh-marquee-track span { display: inline-block; white-space: nowrap; }
+        @keyframes amh-marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         /* main bar */
         .amh-main { background: var(--amh-paper); border-bottom: 1px solid var(--amh-line); position: sticky; top: 0; z-index: 510; }

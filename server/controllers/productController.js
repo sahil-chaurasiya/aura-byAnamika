@@ -123,25 +123,33 @@ const uploadProductImages = async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
-  // Run all files through sharp + Cloudinary concurrently rather than one at
-  // a time — sequential processing meant total time scaled with file count,
-  // which on a slow/cold Render free-tier instance easily pushed multi-image
-  // uploads past the client's timeout even though every image would have
-  // eventually succeeded.
-  const uploadedImages = await Promise.all(req.files.map(async (file) => {
-    // .rotate() with no args reads the EXIF orientation tag (set by phone
-    // cameras held sideways/upside down) and bakes it into the actual pixels
-    // before we resize/compress — otherwise that tag gets lost and the
-    // image displays rotated everywhere except where EXIF is respected.
-    const optimizedBuffer = await sharp(file.buffer)
-      .rotate()
-      .resize({ width: 2000, withoutEnlargement: true })
-      .jpeg({ quality: 80 })
-      .toBuffer();
+  // Process files in small concurrent batches rather than all at once or
+  // fully sequential. Render's free tier has very little CPU and only
+  // 512MB RAM — decoding + resizing several full-size images simultaneously
+  // can spike memory enough to get the process killed mid-request (which
+  // looked like random/partial upload failures), while doing them one at a
+  // time was slow enough to blow past the client's timeout. Small batches
+  // give a middle ground that's safe on constrained hosting.
+  const BATCH_SIZE = 3;
+  const uploadedImages = [];
+  for (let i = 0; i < req.files.length; i += BATCH_SIZE) {
+    const batch = req.files.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(batch.map(async (file) => {
+      // .rotate() with no args reads the EXIF orientation tag (set by phone
+      // cameras held sideways/upside down) and bakes it into the actual pixels
+      // before we resize/compress — otherwise that tag gets lost and the
+      // image displays rotated everywhere except where EXIF is respected.
+      const optimizedBuffer = await sharp(file.buffer)
+        .rotate()
+        .resize({ width: 2000, withoutEnlargement: true })
+        .jpeg({ quality: 80 })
+        .toBuffer();
 
-    const result = await uploadToCloudinary(optimizedBuffer, 'products');
-    return { url: result.secure_url, publicId: result.public_id, alt: product.name };
-  }));
+      const result = await uploadToCloudinary(optimizedBuffer, 'products');
+      return { url: result.secure_url, publicId: result.public_id, alt: product.name };
+    }));
+    uploadedImages.push(...results);
+  }
 
   product.images.push(...uploadedImages);
   if (!product.thumbnail && uploadedImages.length > 0) {

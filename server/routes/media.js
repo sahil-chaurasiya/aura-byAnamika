@@ -13,29 +13,34 @@ router.get('/', protect, admin, async (req, res) => {
 
 router.post('/upload', protect, admin, upload.array('files', 20), async (req, res) => {
   const folder = req.body.folder || 'general';
-  // Process files concurrently — sequential processing meant total time
-  // scaled with file count, which could push multi-file uploads past the
-  // client timeout on a slow/cold server instance.
-  const uploaded = await Promise.all(req.files.map(async (file) => {
-    const result = await uploadToCloudinary(file.buffer, folder, {
-      resource_type: 'image',
-      quality: 'auto',
-      fetch_format: 'auto',
-    });
-    return Media.create({
-      name: file.originalname.replace(/\.[^/.]+$/, ''),
-      originalName: file.originalname,
-      url: result.secure_url,
-      publicId: result.public_id,
-      type: 'image',
-      mimeType: file.mimetype,
-      size: file.size,
-      width: result.width,
-      height: result.height,
-      folder,
-      uploadedBy: req.user._id,
-    });
-  }));
+  // Small concurrent batches rather than all-at-once — safer on low-memory
+  // hosting (see productController.js uploadProductImages for details).
+  const BATCH_SIZE = 3;
+  const uploaded = [];
+  for (let i = 0; i < req.files.length; i += BATCH_SIZE) {
+    const batch = req.files.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(batch.map(async (file) => {
+      const result = await uploadToCloudinary(file.buffer, folder, {
+        resource_type: 'image',
+        quality: 'auto',
+        fetch_format: 'auto',
+      });
+      return Media.create({
+        name: file.originalname.replace(/\.[^/.]+$/, ''),
+        originalName: file.originalname,
+        url: result.secure_url,
+        publicId: result.public_id,
+        type: 'image',
+        mimeType: file.mimetype,
+        size: file.size,
+        width: result.width,
+        height: result.height,
+        folder,
+        uploadedBy: req.user._id,
+      });
+    }));
+    uploaded.push(...results);
+  }
   res.status(201).json({ success: true, data: uploaded });
 });
 

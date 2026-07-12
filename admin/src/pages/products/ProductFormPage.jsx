@@ -99,7 +99,11 @@ export default function ProductFormPage() {
     try {
       const fd = new FormData();
       Array.from(files).forEach(f => fd.append('images', f));
-      const { data } = await api.post(`/products/${id}/images`, fd);
+      // Render's free tier has very little CPU, and processing several full
+      // images (resize + re-encode + Cloudinary round trip) takes far longer
+      // there than locally. Give this call the same kind of long ceiling the
+      // video upload already has, instead of the 60s FormData default.
+      const { data } = await api.post(`/products/${id}/images`, fd, { timeout: 180000 });
       set('images', data.data);
       toast.success(`${files.length} image(s) uploaded`);
     } catch (err) {

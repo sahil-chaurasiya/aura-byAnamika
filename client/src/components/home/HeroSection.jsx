@@ -45,22 +45,44 @@ const DEFAULT_SLIDES = [
 ];
 
 export default function HeroSection() {
-  const [slides, setSlides] = useState(DEFAULT_SLIDES);
+  // Start with no slides so the hardcoded fallback never flashes on screen.
+  // DEFAULT_SLIDES is only used if the API call actually fails or returns empty.
+  const [slides, setSlides] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const mainSwiperRef = useRef(null);
 
   useEffect(() => {
     api.get('/hero')
       .then(r => {
-        if (r.data.data?.length) {
-          // Reset so the main swiper doesn't briefly bind to a thumbs
-          // instance that's about to be torn down and recreated.
-          setThumbsSwiper(null);
-          setSlides(r.data.data);
-        }
+        // Reset so the main swiper doesn't briefly bind to a thumbs
+        // instance that's about to be torn down and recreated.
+        setThumbsSwiper(null);
+        setSlides(r.data.data?.length ? r.data.data : DEFAULT_SLIDES);
       })
-      .catch(() => {});
+      .catch(() => {
+        setThumbsSwiper(null);
+        setSlides(DEFAULT_SLIDES);
+      });
   }, []);
+
+  // Nothing to show yet — real data (or the fallback) hasn't arrived.
+  // Keep the same wrapper elements so layout doesn't jump once slides land.
+  if (!slides) {
+    return (
+      <div className="overflow-hidden">
+        <div className="ul-container">
+          <section className="ul-banner">
+            <div className="ul-banner-slider-wrapper">
+              <div className="ul-banner-slider" />
+            </div>
+            <div className="ul-banner-img-slider-wrapper">
+              <div className="ul-banner-img-slider" />
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   // Identity of the current slide set. Changing this forces React to fully
   // unmount/remount the Swiper instances (via `key`) instead of patching new

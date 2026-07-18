@@ -135,16 +135,6 @@ export default function Footer() {
           <p className="copyright-txt">
             {settings.footer_copyright || 'Copyright 2024 © Aura by Anamika'}
           </p>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            {['VISA', 'MC', 'PAYPAL', 'AMEX', 'APPLE PAY'].map(method => (
-              <span key={method} style={{
-                border: '1px solid rgba(255,255,255,0.2)', borderRadius: 4,
-                padding: '4px 8px', fontSize: 11, color: 'rgba(255,255,255,0.7)'
-              }}>
-                {method}
-              </span>
-            ))}
-          </div>
         </div>
       </div>
     </footer>
